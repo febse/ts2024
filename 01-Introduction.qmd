@@ -297,7 +297,7 @@ available in the internal market (in GWh) in
 [Bulgaria](https://ec.europa.eu/eurostat/cache/metadata/en/nrg_quant_esms.htm).
 
 ```{r, warning=FALSE, output=FALSE}
-electr_r <- read_csv("https://raw.githubusercontent.com/feb-sofia/ts2023/main/data/electricity/bg_internal_consumption.csv") %>%
+electr_r <- read_csv("https://github.com/febse/data/raw/refs/heads/main/ts/electricity/bg_internal_consumption.csv") %>%
   mutate(
     electr = as.numeric(electr)
   ) %>%

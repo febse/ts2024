@@ -16,9 +16,9 @@ Let $X$ and $Y$ be two discrete random variables with possible values $0, 1, \ld
 For example:
 
 ```{r, echo=FALSE, warning=FALSE, output=FALSE}
-px <- read_csv("https://raw.githubusercontent.com/feb-sofia/ts2023/main/data/review/px.csv")
-py <- read_csv("https://raw.githubusercontent.com/feb-sofia/ts2023/main/data/review/py.csv")
-pxy <- read_csv("https://raw.githubusercontent.com/feb-sofia/ts2023/main/data/review/pxy.csv") %>%
+px <- read_csv("https://github.com/febse/data/raw/refs/heads/main/ts/review/px.csv")
+py <- read_csv("https://github.com/febse/data/raw/refs/heads/main/ts/review/py.csv")
+pxy <- read_csv("https://github.com/febse/data/raw/refs/heads/main/ts/review/pxy.csv") %>%
   select(x, y, p)
 ```
 
