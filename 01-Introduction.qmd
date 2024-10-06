@@ -1,0 +1,527 @@
+
+# Introduction {#introduction}
+
+For a very quick introduction to R, you can refer to the 
+[Introduction to Econometrics 2023 course](https://feb-sofia.github.io/econometrics-2023/01-Introduction-to-R.html). @WICKHAM2016DataScienceImport offer a more thorough introduction to the tidyverse packages in their [R for data science book](https://r4ds.had.co.nz/).
+
+
+```{r intro-install-pck}
+# install.packages(c(
+#   "tidyverse",
+#   "xts",
+#   "quantmod",
+#   "fable",
+#   "feasts",
+#   "tsibble",
+#   "lubridate",
+#   "tsbox",
+#   "eurostat"
+# ))
+```
+
+```{r intro-load-pck, warning=FALSE, output=FALSE}
+Sys.setlocale("LC_ALL","en_US.utf8")
+
+library(tidyverse)
+library(xts)
+library(quantmod)
+library(fable)
+library(feasts)
+library(tsibble)
+library(lubridate)
+library(eurostat)
+library(tsbox)
+```
+
+A *time series* is a sequence of values ordered by time. This course will focus on series that take values in $\mathbb{R}$. Let
+$x_1, x_2, \ldots, x_T$ be a sequence of values ordered by a time index
+$t = 1,\ldots,T$. The value of the series is determined by:
+
+$$
+\begin{align}
+x_t & = (1 + 0.02)x_{t - 1},\quad x_0 = 10 \implies \\
+x_t & = 10 \times(1 + 0.02)^{t} \\
+\end{align}
+$$ {#eq-geom-series}
+
+Lets compute and plot the values of this sequence for $t = 1,\ldots,20$.
+
+```{r intro-gs}
+dt <- tibble(
+  tidx = 1:20,
+  x = 10 *(1 + 0.02)^tidx
+)
+
+dt %>%
+  ggplot(aes(x = tidx, y = x)) +
+    geom_point() + 
+    geom_line() + 
+    scale_x_continuous(breaks = seq(1, 20, 2)) +
+    labs(
+      x = "t",
+      y = expression(x[t])
+    )
+```
+
+This series is an example of a *deterministic* sequence. For every point
+in time $t$, you can use the formula in @eq-geom-series to compute the
+value of the series, e.g.:
+
+$$
+x_{7} = 1.02^{7}\times 10 \approx 11.487
+$$
+
+## Date and Time objects in R
+
+Internally, dates are stored as the number of days since a (arbitrary) reference (origin). The default origin in R is the first of January 1970.
+
+```{r intro-dates-1}
+origin <- as.Date("1970-01-01")
+jan02.1970 <- as.Date("1970-01-02")
+
+origin
+jan02.1970
+
+as.numeric(origin)
+as.numeric(jan02.1970)
+
+origin + 5
+origin + 5:10
+```
+
+Time is stored as the number of seconds (and fractions of a second)
+since the origin: 1970-01-01 00:00:00
+[UCT](https://en.wikipedia.org/wiki/Coordinated_Universal_Time). POSIX
+stands for [Portable Operating System
+Interface](https://en.wikipedia.org/wiki/POSIX).
+
+```{r intro-times}
+origin_time <- as.POSIXct("1970-01-01 00:00:00", tz = "UCT")
+some_other_time <- as.POSIXct("1970-01-01 00:01:00", tz = "UCT")
+
+# Print the value of origin_time
+origin_time
+
+# Print the value of origin_time
+some_other_time
+
+# Print the numeric value of origin_time (seconds since the origin)
+as.numeric(origin_time)
+
+# Print the numeric value of some_other_time (seconds since the origin)
+as.numeric(some_other_time)
+```
+
+```{r}
+class(origin_time)
+```
+
+The package `lubridate` provides utility functions for working with date
+and time objects. You can look at this online guide
+[here](https://lubridate.tidyverse.org/).
+
+```{r}
+# Sys.time returns the current time
+now <- Sys.time()
+
+# Print the value of now
+now
+
+# Day of the month
+day(now)
+
+# Day of the week (depends on the start of week assumption)
+wday(now)
+wday(now, week_start = 1)
+
+# Day of the week as string (locale dependent)
+wday(now, label = TRUE)
+
+# Day of the year
+yday(now)
+
+# Week of the year
+week(now)
+
+# Month of the year
+month(now)
+
+# Quarter of the year
+quarter(now)
+```
+
+:::{#exr-date-objecs}
+
+## Date Objects in R
+
+
+1. What day of the week was the 10-th of June 2019?
+2. Create a sequence of 34 consecutive dates starting on the 2-nd of January 2017. What was the year quarter of the last date of this sequence?
+
+:::
+:::{.solution}
+```{r}
+# Type your code here
+
+```
+:::
+
+## Time Series Classes
+
+There are several classes that are used for storing time series in
+R. We will mainly focus on `tsibble`, but some functions we will encounter later in the course return or require `ts` or `xts` objects.
+
+- `ts`
+- `xts` (see the [xts vignette](https://cran.r-project.org/web/packages/xts/vignettes/xts.pdf))
+- `tsibble` (see the [introduction to tsibble](https://cran.rstudio.com/web/packages/tsibble/vignettes/intro-tsibble.html))
+
+### Creating ts Objects
+
+```{r}
+ts(dt$x, start = 1960, frequency = 12)
+```
+
+```{r}
+ts(dt$x, start = 1960, frequency = 4)
+```
+
+```{r}
+ts(dt$x, start = 1960, frequency = 1)
+```
+
+### Creating xts Objects {#intro-ts-objects}
+
+Unlike `ts`, `xts` requires an explicit time index in the form of
+date-like objects:
+
+-   yearmon (package `zoo`)
+-   yearqtr (package `zoo`)
+-   Date
+-   POSIX
+
+```{r}
+# Here, we arbitrarily choose monthly measurements 
+# to demonstrate the construction of xts objects
+
+# First, we construct a time index: the months from Feb 1960 to Sep 1961 by using the as.yearmon function. Note that yearmon stores a month as the year plus a fraction
+
+as.yearmon("1960-01")
+as.numeric(as.yearmon("1960-01"))
+
+as.yearmon("1960-02")
+as.numeric(as.yearmon("1960-02"))
+
+as.yearmon("1960-03")
+as.numeric(as.yearmon("1960-03"))
+
+as.yearmon("1960-01") + 1:20 / 12
+
+dt <- dt %>%
+  mutate(
+    # n() counts the number of rows in the table,
+    month = as.yearmon("1960-01") + 1:n() / 12
+  )
+
+dt_xts <- xts(
+  dt, 
+  order.by = dt$month
+)
+
+dt_xts
+```
+
+
+Like `xts`, `tsibble` requires an explicit date-like object as an index.
+You can use the `tsibble` provided functions `yearmonth`, `yearquarter`,
+etc.
+
+Note that `yearmonth` and `yearquarter` behave differently from 
+`as.yearmon` and `as.yearqtr`. `yearmonth` counts the number of months since the origin. `yearquarter` tracks the number of quarters since the origin.
+
+```{r}
+yearquarter("2021-10")
+as.numeric(yearquarter("2021-10"))
+```
+
+
+```{r}
+dt_ts <- dt %>% 
+  mutate(
+    x = x, 
+    month = yearmonth("1960-01") + 1:n()
+    ) %>%
+  as_tsibble(
+    index = month
+  )
+
+dt_ts
+```
+
+The package `tsbox` provides functions that can convert between these
+classes. You can learn more about the package
+[here](https://docs.ropensci.org/tsbox/).
+
+:::{#exr-tsibble-constr}
+## Tsibbles
+
+The following chunk creates `tibble` (dt_r) with the integers from 5 to 18 in the column "x". These are quarterly measurements with the first observation corresponding to 2018Q2. Use `mutate` to add column holding a time index using the `yearquarter` function and create a `tsibble` using the `as_tsibble` function.
+
+```{r}
+dt_r <- tibble(
+  x = 5:18
+)
+```
+
+
+:::
+:::{.solution}
+
+```{r}
+# Type your code here
+
+```
+
+:::
+
+## Features of a Time Series
+
+-   Trend
+-   Seasonal patterns
+-   Cyclical patterns
+-   Non-systematic fluctuations
+
+## Electricity Production Example
+
+The dataset `electr_r` contains monthly values of the electricity
+available in the internal market (in GWh) in
+[Bulgaria](https://ec.europa.eu/eurostat/cache/metadata/en/nrg_quant_esms.htm).
+
+```{r, warning=FALSE, output=FALSE}
+electr_r <- read_csv("https://raw.githubusercontent.com/feb-sofia/ts2023/main/data/electricity/bg_internal_consumption.csv") %>%
+  mutate(
+    electr = as.numeric(electr)
+  ) %>%
+  filter(!is.na(electr)) %>%
+  rename(
+    GWh = electr
+  )
+```
+
+```{r}
+# Returns the first rows so that we can get an idea about
+# the contents of the tibble (data table).
+
+head(electr_r)
+```
+
+The raw data `electr_r` contains a column called `month` that shows the month to which the value in `GHw` refers. The `month` column is character (chr) and is not in a format we can use as a time index. We need to _parse_ the text to get a numeric representation of the month. This is what the `yearmonth` function does (for monthly measurements).
+
+```{r}
+electr <- electr_r %>%
+  mutate(
+    # Create a new column called ym that holds the numeric 
+    # time index
+    ym = yearmonth(month)
+  ) %>%
+  as_tsibble(
+    # This assigns the newly created column ym as the time index
+    index = ym
+  )
+```
+
+```{r}
+electr %>%
+  autoplot(GWh) + 
+  labs(
+    x = "Month"
+  )
+```
+
+An advantage of the `tsibble` objects is that you can use familiar verbs, for example:
+
+- `mutate`: to create new columns or modify existing ones
+- `select`: to select a subset of columns
+- `filter`: to select a subset of rows
+
+For more information, check the documentation
+[here](https://tsibble.tidyverts.org/reference/tsibble-tidyverse.html).
+
+```{r}
+# Examples for creating new columns with mutate
+
+electr1 <- electr %>%
+  mutate(
+    GWh_centered = GWh - mean(GWh),
+    GWh_log = log(GWh),
+  ) %>%
+  select(-GWh)
+```
+
+You can also use the `mean`, `sd`, `summary`, etc. by selecting the
+columns from the `tsibble` using the \$ syntax.
+
+```{r}
+electr$GWh
+```
+
+
+```{r}
+# Compute the arithmetic average of the values
+# in the GWh column of the data set electr
+
+mean(electr$GWh)
+```
+
+```{r}
+summary(electr$GWh)
+```
+
+```{r}
+electr %>%
+  gg_season() + 
+  labs(
+    x = "Month",
+    colour = "Year"
+  )
+```
+
+```{r}
+electr %>%
+  gg_subseries() + 
+  labs(
+    x = "Year"
+  )
+```
+
+Both `tsibble` and `xts` objects support convenient filtering by the
+time index. You can check the syntax of both packages here:
+
+-   xts
+    [cheatsheet](https://images.datacamp.com/image/upload/v1676303253/Marketing/Blog/xts_Cheat_Sheet.pdf)
+-   tsibble
+    [filter_index](https://tsibble.tidyverts.org/reference/filter_index.html)
+
+```{r}
+electr %>%
+  filter_index("2008-01"~"2008-12")
+```
+
+```{r}
+electr %>%
+  filter_index("2008-01"~"2008-12") %>%
+  as_tibble() %>%
+  summarise(
+    mean = mean(GWh)
+  )
+```
+
+You can use `index_by` and `summarise` to change the frequency of the
+data, i.e., to collapse the time series (e.g., from daily to monthly,
+from monthly to annual, etc.).
+
+```{r}
+electr %>%
+  index_by(qrt = ~ yearquarter(.)) %>%
+  summarise(
+    GWh = sum(GWh)
+  ) %>%
+  autoplot(GWh)
+```
+
+## Bitcoin Exchange Rate Example
+
+
+
+
+:::{#exr-data-prep}
+
+## Reading and Working with tsibble Objects
+
+The following chunk uses the `eurostat` package to download quarterly,
+seasonally unadjusted series in constant 2015 prices for the Bulgarian
+GDP between 1995 and 2023.
+
+```{r, warning=FALSE, output=FALSE}
+gdp_q <- get_eurostat(
+  "namq_10_gdp",
+  filters = list(
+    geo="BG",
+    unit = "CLV_I15",
+    na_item = "B1GQ",
+    s_adj = "NSA"
+  ),
+  cache = FALSE,
+  type = "code"
+) %>%
+  filter(!is.na(values)) %>%
+  mutate(
+    time = str_replace(time, "-", " "),
+    values = as.numeric(values)
+  )
+```
+
+1. Create a `tsibble` object to hold the time series. Hint: Use the
+    `as_tsibble` and `yearquarter` functions from the `tsibble` package. Use the 
+    code from the introduction
+2. What is the unit of measurement: EUR or BGN? Take a look at the
+    values and make a guess.
+3. What are the dates of the first and the last observations?
+4. What is the average quarterly GDP over the whole period.
+5. Compute the average GDP by quarter.
+6. Create a series of annual GDP measurements by summing the values of
+    the quarterly GDP in each year. Hint: use `index_by` and
+    `summarise`.
+7. Is there a seasonal pattern in the data? Create a seasonal plot
+    using the `gg_season` function from the `tsibble` package. Which
+    quarter tends to have the lowest GDP?
+8. Is there a trend visible in the data?
+9. Compute the average quarterly GDP between before 2009 and after (and
+    including) 2009.
+:::
+
+<!-- ```{r} -->
+<!-- gdp <- gdp_q %>% -->
+<!--   mutate( -->
+<!--     qrt = yearquarter(time) -->
+<!--   ) %>% -->
+<!--   as_tsibble( -->
+<!--     index = qrt -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gdp %>% -->
+<!--   autoplot(values) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gdp %>% -->
+<!--   gg_season() -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- gdp %>% -->
+<!--   index_by(q = quarter(qrt)) %>% -->
+<!--   summarise( -->
+<!--     gdp = mean(values) -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gdp$values %>% mean() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- gdp_annual <- gdp %>% -->
+<!--   index_by( -->
+<!--     year = year(qrt) -->
+<!--   ) %>% -->
+<!--   summarise( -->
+<!--     gdp = sum(values) -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- guess_frequency(gdp$qrt) -->
+<!-- guess_frequency(gdp_annual$year) -->
+<!-- ``` -->
+

@@ -1,0 +1,93 @@
+# General Information {.unnumbered}
+
+## Schedule
+
+1. Wednesday, 15:15-16:45, room 308k (Bulgarian)
+1. Thursday, 8:30-10:00, room 303k
+2. Thursday, 10:15-11:45, room 303k
+
+## Grading
+
+The course consists of two parts: lectures and exercise classes. Your final grade will be the average of the grades of these two parts. To obtain a grade for the exercise classes, you need to complete a homework project at the end of the semester—details to be announced.
+
+## GitHub Repository
+
+All course materials for the exercise classes will be available in the GitHub
+repository:
+
+[{{< var github >}}]({{< var github >}})
+
+## Software Setup
+
+The exercise classes require a minimal software setup:
+
+1. Open <https://cran.r-project.org/>, and you will find links to R builds for different operating systems. Click on the link matching your operating system and choose the latest version of R. When using the Windows operating system, you will see a link "Install R for the first time ." Click on this link and then download the R installer. Run the installer and accept the default settings.
+
+2. After installing R, open <https://posit.co/download/rstudio-desktop/>. If the web page recognizes your operating system, you will see a download button (right side of the page) for R studio. If the button does not appear, scroll down the page and find the installer appropriate for your operating system. 
+
+3. Should you encounter difficulties installing R and R Studio, you can watch
+these video guides:
+
+- [Windows](https://www.youtube.com/watch?v=YrEe2TLr3MI)
+- [Mac](https://www.youtube.com/watch?v=n8kP7c_QbLA)
+- [Ubuntu 22.04](https://www.youtube.com/watch?v=NFEDEXWomI4)
+
+4. Optionally, you can also download and install git. In case of difficulties, these videos may help.
+- [Windows](https://www.youtube.com/watch?v=AdzKzlp66sQ)
+- [Mac](https://www.youtube.com/watch?v=hMEyBtsuAJE)
+- [Linux](https://www.youtube.com/watch?v=bc3_FL9zWWs)
+
+5. **The following steps depend on git being installed**. Open R Studio and open a new project dialog: File -> New Project. In the 
+dialog, click on the third option: version control. From the next menu, select git.
+
+![Open a new project.](figures/RStudio_new_project_1.png)
+![Select version control](figures/RStudio_new_project_2.png)
+![Select git](figures/RStudio_new_project_3.png)
+
+In the Repository URL field, paste the address of the course repository:
+
+```
+{{< var githubHttps >}}
+```
+
+![Paste the git repository address](figures/RStudio_new_project_4.png)
+Click on the Create Project button and wait for git R studio to clone the
+repository and open the project.
+
+![Step 5](figures/RStudio_new_project_5.png)
+6. The content of the GitHub repository will be updated continuously throughout
+the semester. In order to download the new files or updated versions of already
+existing files, you can use git pull. Open the git window in the upper right pane
+of R studio and click the pull button. This will download all changes from the GitHub
+repository to your local copy.
+
+![Step 7](figures/RStudio_new_project_7.png)
+
+
+8. Note that if you have modified the files tracked by git that have changed
+in the repository, git pull will fail with an error similar to this one:
+
+![Pull error](figures/RStudio_new_project_8.png)
+
+To avoid this, you can roll back the file to its original state. Right-click
+on the file in the git window and choose "revert."
+
+![Revert](figures/RStudio_new_project_revert.png)
+
+9. In the exercise classes, we will use many functions from the `tidyverse` system and several other packages. Before accessing these packages' functionality, you need to install them first. Find the R console in R studio and paste the following line on the command line. Press enter to run it and wait for the installation to complete.
+
+```{r, eval = FALSE}
+install.packages(c("tidyverse", "tsibble", "xts", "quantmod", "urca", "rugarch", "rmarkdown"))
+```
+
+![Install packages](figures/RStudio_new_project_install_packages.png)
+
+Optional: more on Quarto: <https://quarto.org/docs/guide/>
+
+Optional: a base R cheatsheet: <https://www.datacamp.com/cheat-sheet/getting-started-r>
+
+
+## Recommended Reading
+
+1. @KIRCHGASSNER2013IntroductionModernTime
+2. @COWPERTWAIT2009IntroductoryTimeSeries
