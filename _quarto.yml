@@ -8,7 +8,7 @@ book:
   date: "10/1/2024"
   chapters:
     - index.qmd
-    - 00-Assignment.qmd
+    # - 00-Assignment.qmd
     - 01-Introduction.qmd
     - 02-Statistics-Review.qmd
     - 03-linear-difference-equations.qmd

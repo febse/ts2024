@@ -5,7 +5,6 @@ library(tidyverse)
 ```
 
 
-
 ## First Order Difference Equations
 
 Difference equations describe the dynamic behavior of a sequence by relating
