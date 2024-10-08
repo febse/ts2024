@@ -1,13 +1,4 @@
-project:
-  type: book
-  output-dir: _site
-
 book:
-  title: "Introduction to Time Series Analysis 2024/2025"
-  author: "Boyko Amarov"
-  date: "10/1/2024"
-  chapters:
-    - index.qmd
     # - 00-Assignment.qmd
     # - 01-Introduction.qmd
     # - 02-Statistics-Review.qmd
@@ -17,11 +8,10 @@ book:
     # - 06-Unit-Root-Tests.qmd
     # - 08-ARIMA-Forecasting.qmd
     # - 09-GARCH.qmd
-    - references.qmd
-  # google-analytics: G-4SEWJRKMLS
-  # cookie-consent: true
+    # - references.qmd
+  google-analytics: G-4SEWJRKMLS
+  cookie-consent: true
 
-bibliography: refs.bib
 
 format:
   html:
