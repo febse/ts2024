@@ -6,21 +6,28 @@ For a very quick introduction to R, you can refer to the
 
 
 ```{r intro-install-pck}
-# install.packages(c(
-#   "tidyverse",
-#   "xts",
-#   "quantmod",
-#   "fable",
-#   "feasts",
-#   "tsibble",
-#   "lubridate",
-#   "tsbox",
-#   "eurostat"
-# ))
+if (!require("tidyverse")) install.packages("tidyverse")
+
+if (!require("xts")) {
+  install.packages(c(
+  "tidyverse",
+  "xts",
+  "quantmod",
+  "fable",
+  "feasts",
+  "tsibble",
+  "lubridate",
+  "tsbox",
+  "eurostat"
+  ))
+}
 ```
 
 ```{r intro-load-pck, warning=FALSE, output=FALSE}
+# Sets the locale to US English (this is relevant for the display of dates)
 Sys.setlocale("LC_ALL","en_US.utf8")
+
+# Load the packages
 
 library(tidyverse)
 library(xts)
@@ -428,7 +435,7 @@ electr %>%
   autoplot(GWh)
 ```
 
-## Bitcoin Exchange Rate Example
+## Bitcoin Price Example
 
 
 

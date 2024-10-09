@@ -1,5 +1,12 @@
 # General Information {.unnumbered}
 
+:::{.callout-note}
+
+[{{< var url >}}]({{< var url >}}){style="font-size:2em; margin-left: 1em;"}
+
+![](figures/qr_code.png){font-size=2em}
+:::
+
 ## Schedule
 
 1. Wednesday, 15:15-16:45, room 308k (Bulgarian)
@@ -88,6 +95,8 @@ Optional: a base R cheatsheet: <https://www.datacamp.com/cheat-sheet/getting-sta
 
 
 ## Recommended Reading
+
+[Link](https://firebasestorage.googleapis.com/v0/b/uni-sofia.appspot.com/o/literature%2Ftimeseries2018%2Ftslit.zip?alt=media&token=6399d981-324a-452d-a489-3ed4b3ab520f)
 
 1. @KIRCHGASSNER2013IntroductionModernTime
 2. @COWPERTWAIT2009IntroductoryTimeSeries
