@@ -435,7 +435,7 @@ electr %>%
   autoplot(GWh)
 ```
 
-## Bitcoin Exchange Rate Example
+## Bitcoin Price Example
 
 
 

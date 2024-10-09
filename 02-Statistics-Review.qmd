@@ -114,6 +114,8 @@ Sample 10000 values from its distribution and compute the sample frequency of ea
 ```{r}
 # Type your code here
 
+smpl_y <- py %>%
+  slice_sample(n = 10000, weight_by = p, replace = TRUE)
 ```
 :::
 
