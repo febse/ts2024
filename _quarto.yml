@@ -11,7 +11,7 @@ book:
     # - 00-Assignment.qmd
     - 01-Introduction.qmd
     - 02-Statistics-Review.qmd
-    # - 03-linear-difference-equations.qmd
+    - 03-linear-difference-equations.qmd
     # - 04-AR.qmd
     # - 05-Model-Fitting.qmd
     # - 06-Unit-Root-Tests.qmd
