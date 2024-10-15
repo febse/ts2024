@@ -86,6 +86,7 @@ that all other values of $e$ remain unchanged.
 $$
 \frac{\partial y_{t + j}}{\partial e_{t}} = \phi^j
 $$
+
 Note that the effect on $y_{t}$ only depends on the distance in time between the shock $e_t$ and 
 the response $y_{t + j}$, not on the time index itself. This is a property of _linear_ difference equations.
 
