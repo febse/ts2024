@@ -5,7 +5,7 @@ library(tidyverse)
 ```
 
 
-## First Order Difference Equations
+## First Order Linear Difference Equations
 
 Difference equations describe the dynamic behavior of a sequence by relating
 the current value of a variable to its previous values.
@@ -580,3 +580,112 @@ the `polyroot` function in R. Is the equation stable?
 ```
 
 :::
+
+## Further Details: Eigenvalue Decomposition
+
+What is the eigenvalue decomposition of a matrix?
+
+Let us consider what the multiplication of a matrix with a vector actually does. This is easier to understand with two-dimensional vectors, because we can plot them, but the same principle applies to higher dimensions.
+
+Let's define an (arbitrary) matrix $A \in M(2, 2,)$ and a vector $v \in M(2, 1)$, for example:
+
+$$
+A = \begin{pmatrix}
+-1 & 2.5 \\
+-2 & 1.2
+\end{pmatrix}
+$$
+
+$$
+v = \begin{pmatrix}
+1 \\
+1
+\end{pmatrix}
+$$
+
+
+The vector points in the direction of the line $y = x$ (a 45-degree angle) and has length $\sqrt{1^2 + 1^2} = \sqrt{2}$. Let's now multiply the matrix with the vector and see what happens.
+
+$$
+A \cdot v = \begin{pmatrix}
+-1 & 2.5 \\
+-2 & 1.2
+\end{pmatrix}
+\begin{pmatrix}
+1 \\
+1
+\end{pmatrix}
+= 
+\begin{pmatrix}
+-1 \cdot 1 + 2.5 \cdot 1 \\
+-2 \cdot 1 + 1.2 \cdot 1
+\end{pmatrix}
+=
+\begin{pmatrix}
+1.5 \\
+-0.8
+\end{pmatrix}
+$$
+
+The result from the multiplication is a new vector of the same dimension as the original vector, but it points in a different direction and as a different length. The matrix $A$ has transformed the vector $v$ into a new vector $v'$. In other words you can think of the matrix as a rule that transforms vectors into new vectors.
+
+Let's compute the new vector in R.
+
+```{r}
+v = c(1, 1)
+A = matrix(c(-1, 2.5, -2, 1.2), ncol = 2)
+v1 = A %*% v
+v1
+```
+
+Let's now plot the original vector and the new vector and compute their lengths.
+
+```{r}
+# Create a data frame with the vector coordinates
+dt <- tibble(
+  x = c(0, 0),
+  y = c(0, 0),
+  xend = c(1, v1[1]),
+  yend = c(1, v1[2])
+)
+
+# Plot the vectors
+ggplot(dt) +
+  geom_segment(aes(x = x, y = y, xend = xend, yend = yend), arrow = arrow(length = unit(0.2, "inches"))) +
+  xlim(-3, 2) + ylim(-3, 5) +
+  labs(title = "Vector Plot", x = "x", y = "y") +
+  theme_minimal()
+```
+
+We have already computed the length of the original vector $v$ (it is $\sqrt{2}$).
+
+```{r}
+sqrt(2)
+sqrt(sum(v^2))
+```
+
+We can apply the same computation to the new vector $v'$.
+
+```{r}
+sqrt(sum(v1^2))
+```
+
+As we have seen, the matrix A has both rotated the vector and has changed its length.
+
+It turns out that there are special vectors that are not rotated by the matrix. Instead, the matrix multiplication applied to them only changes their length, i.e. the matrix multiplication acts as a simple scalar multiplication.
+
+$$
+A v = \lambda v, \quad \lambda \in \mathbb{R}
+$$
+
+These are special vectors that exist for square matrices. They are called eigenvectors, and the scalar $\lambda$ is called the eigenvalue. The eigenvectors and eigenvalues of a matrix are the building blocks of the matrix. Any matrix can be decomposed into a product of its eigenvectors and eigenvalues.
+
+How can we find these special vectors and scalars? This is the question that the eigenvalue decomposition answers. 
+
+If the matrix multiplied by the vector should equal the vector multiplied by a scalar, then we can rewrite the equation as:
+
+$$
+A v = \lambda v \iff A v - \lambda v = 0 \iff (A - \lambda I) v = 0
+$$
+
+where $I$ is the identity matrix (with such a dimenstion that the operations are valid).
