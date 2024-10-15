@@ -633,9 +633,13 @@ Let's compute the new vector in R.
 
 ```{r}
 v = c(1, 1)
-A = matrix(c(-1, 2.5, -2, 1.2), ncol = 2)
+A = matrix(c(-1, 2.5, -2, 1.2), ncol = 2, byrow = TRUE)
 v1 = A %*% v
 v1
+```
+
+```{r}
+A
 ```
 
 Let's now plot the original vector and the new vector and compute their lengths.
@@ -689,135 +693,3 @@ A v = \lambda v \iff A v - \lambda v = 0 \iff (A - \lambda I) v = 0
 $$
 
 where $I$ is the identity matrix (with such a dimenstion that the operations are valid).
-
-## Appendix: Eigendecomposition
-
-Eigendecomposition can only be applied to square matrices (for non-square matrices, see the [Singular Value Decomposition](https://en.wikipedia.org/wiki/Singular_value_decomposition)).
-
-There are several interpretations of the eigendecomposition. A (relatively) more intuitive one is a gemetric interpretation. 
-
-Consider a matrix
-
-$$
-A = \begin{pmatrix}
--1 & 2.5 \\
--2 & 1.2
-\end{pmatrix}
-$$
-
-What does the multiplication of a matrix and a vector do? It transforms the vector into a new vector. 
-
-$$
-v = \begin{pmatrix}
-1 \\
-1
-\end{pmatrix}
-$$
-
-$$
-A \cdot v = \begin{pmatrix}
--1 & 2.5 \\
--2 & 1.2
-\end{pmatrix}
-\begin{pmatrix}
-1 \\
-1
-\end{pmatrix}
-=
-\begin{pmatrix}
--1 \cdot 1 + 2.5 \cdot 1 \\
--2 \cdot 1 + 1.2 \cdot 1
-\end{pmatrix}
-=
-\begin{pmatrix}
-1.5 \\
--0.8
-\end{pmatrix}
-$$
-
-The result of the matrix multiplication is a new vector. Let's compute the new vector in R and visualize both the original and the new vector.
-
-```{r}
-v = c(1, 1)
-A = matrix(c(-1, 2.5, -2, 1.2), ncol = 2)
-v1 = A %*% v
-v1
-```
-
-```{r}
-library(tidyverse)
-
-dt <- tibble(
-  x = c(0, 0),
-  y = c(0, 0),
-  xend = c(1, v1[1]),
-  yend = c(1, v1[2])
-)
-
-dt %>% 
-  ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
-  geom_segment(arrow = arrow(length = unit(0.2, "inches")))+
-  xlim(-3, 2) + ylim(-3, 5) +
-  labs(title = "Vector Plot", x = "x", y = "y") +
-  theme_minimal()
-```
-
-From the plot you can see that the matrix has rotated the vector and changed its length (stretched it).
-
-Let's see what scalar multiplication does to a vector. It simply stretches (for $\lambda > 1$) or shrinks (for $\lambda < 1$) the vector. It can also change the direction of the vector if $\lambda < 0$. However, the direction of the vector is preserved if $\lambda > 0$ and fully reversed if $\lambda < 0$.
-
-
-```{r}
-v = c(1, 1)
-v1 = 2 * v
-v2 = 0.5 * v
-v3 = -1.5 * v
-
-dt <- tibble(
-  x = c(0, 0, 0, 0),
-  y = c(0, 0, 0, 0),
-  xend = c(1, v1[1], v2[1], v3[1]),
-  yend = c(1, v1[2], v2[2], v3[2])
-)
-
-dt %>% 
-  ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
-  geom_segment(arrow = arrow(length = unit(0.2, "inches")))+
-  xlim(-3, 2) + ylim(-3, 5) +
-  labs(title = "Vector Plot", x = "x", y = "y") +
-  theme_minimal()
-```
-
-It turns out that there are special vectors that are not rotated by the matrix. Instead, the matrix multiplication applied to them only changes their length, i.e. the matrix multiplication acts as a simple scalar multiplication.
-
-If a matrix multiplied by a vector should equal the vector multiplied by a scalar, then we can write an equation such as this one:
-
-$$
-A v = \lambda v, \quad \lambda \in \mathbb{R}
-$$
-
-If this equation is to be true, then we can rewrite it as:
-
-$$
-A v - \lambda v = 0
-$$
-
-Keep in mind that because a matrix multiplied by a vector is a new vector, the zero is not the number zero, but a whole vector of zeros. 
-
-Then we can write 
-
-$$
-(A - \lambda I) v = 0
-$$
-
-where $I$ is the identity matrix. 
-
-For non-singular (full-rank) matrices the multiplication of a matrix and a vector can only result in a zero vector if the vector is a zero vector.
-
-If this shifted matrix $A - \lambda I$ is to be singular, then the determinant of this matrix must be zero. This is the condition for the eigenvalues of a matrix.
-
-$$
-\det(A - \lambda I) = 0
-$$
-
-The last equation is the characteristic equation of the matrix. The solutions of this equation are the eigenvalues of the matrix.
