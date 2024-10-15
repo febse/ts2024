@@ -692,4 +692,13 @@ $$
 A v = \lambda v \iff A v - \lambda v = 0 \iff (A - \lambda I) v = 0
 $$
 
-where $I$ is the identity matrix (with such a dimenstion that the operations are valid).
+where $I$ is the identity matrix (with such a dimenstion that the operations are valid). Note that the zero on the right-hand side is a zero _vector_, not a scalar.
+
+Now there is a simple rule in linear algebra: If the product of a matrix and a vector is zero (and the vector is not the zero vector), then the matrix is singular (i.e. it has no inverse, i.e. it has linearly dependent columns, i.e. its determinant is zero). This means that the matrix $A - \lambda I$ has no inverse, which means that its determinant is zero.
+
+This gives us a way to find the eigenvalues of a matrix:
+
+$$
+\det(A - \lambda I) = 0
+$$
+
