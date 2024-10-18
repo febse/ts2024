@@ -10,8 +10,8 @@ book:
     - index.qmd
     # - 00-Assignment.qmd
     - 01-Introduction.qmd
-    - 02-Statistics-Review.qmd
-    - 03-Linear-Difference-Equations.qmd
+    - 02-Linear-Difference-Equations.qmd
+    - 03-Statistics-Review.qmd
     # - 04-AR.qmd
     # - 05-Model-Fitting.qmd
     # - 06-Unit-Root-Tests.qmd
