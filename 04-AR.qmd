@@ -1,0 +1,588 @@
+
+```{r}
+library(tidyverse)
+```
+
+# Autoregressive Processes
+
+$$
+y_1, y_2,\ldots,y_{T}
+$$
+
+For the rest of the course we will drop the distinction between the random variables (the stochastic process) and the observed values of the time series. You need to discern from the context whether we are talking about the random variables of about the values.
+
+
+## The Purely Random Process
+
+In the last class we discussed linear difference equations and their stability. Here we will introduce randomness into the difference equation by assuming that the autonomous terms $e_t$ are uncorrelated and follow a distribution with zero mean and constant variance (not depending on the time index).
+
+:::{#def-purely-random}
+## The Purely Random Process
+
+A stochastic process $e_t$ with the follwing three properties is called a purely random or a white noise process.
+
+$$
+\begin{align}
+& E(e_t) = 0 \text{ for all } t \\
+& Var(e_t) = \sigma^2, \sigma^2 \in \mathbb{R} \\
+& Cov(e_{t}, e_{t + k}) = 0, k \neq 0
+\end{align}
+$$
+
+:::
+
+From the definitions of variance (@def-variance) and covariance (@def-covariance) you can see that the
+covariance between two time points is simply the expected value of the cross product of the terms, because $E(e_t) = 0$ for all $t$.
+
+$$
+Cov(e_t, e_{t + k}) = E(e_{t}e_{t + k}) = 0
+$$
+
+When $k = 0$, this expression reduces to
+
+$$
+Cov(e_t, e_{t + 0}) = E(e_t e_t) = E(e_t^2) = \sigma^2
+$$
+How does such a process look like? It is convenient to generate random values in order to visualize it.
+
+```{r purely-random-sim}
+n <- 100
+
+dt <- tibble(
+  t = 1:n,
+  e = rnorm(
+    # The number of values to be drawn at random
+    n = n, 
+    # The expected value of the distribution
+    mean = 0,
+    # The standard deviation of the distribution
+    sd = 2
+    )
+)
+
+dt %>%
+  ggplot(aes(x = t, y = e)) + 
+  geom_line()
+```
+
+In order to see how the two parameters of the normal distribution affect the 
+shape of the resulting series, the following code chunk shows four series:
+
+$$
+\begin{align}
+e^{(1)}_t & \sim N(\mu = 0, \sigma^2 = 1) \\
+e^{(2)}_t & \sim N(\mu = 10, \sigma^2 = 1) \\
+e^{(3)}_t & \sim N(\mu = 0, \sigma^2 = 3^2) \\
+e^{(4)}_t & \sim N(\mu = 10, \sigma^2 = 3^2)
+\end{align}
+$$
+
+```{r purely-random-mean-var}
+## For illustration only
+
+n <- 100
+
+sim_data <- expand_grid(
+  mu = c(0, 10),
+  sigma = c(1, 3),
+  t = 1:n
+) %>%
+  mutate(
+    y = rnorm(n(), mean = mu, sd = sigma),
+    sigma_lab = paste0("sigma = ", sigma),
+    mu_lab = paste0("mu = ", mu)
+  )
+
+sim_data %>%
+  ggplot(aes(x = t, y = y, color = mu_lab)) +
+  geom_point(size = 1 / 2) +
+  geom_line() +
+  facet_wrap(~sigma_lab) +
+  labs(
+    x = "t",
+    y = expression(y[t]),
+    color = "Expected value"
+  )
+```
+
+```{r}
+sim_data %>%
+  group_by(mu_lab, sigma_lab) %>%
+  summarise(
+    Average = mean(y),
+    StdDev = sd(y)
+  )
+```
+
+Now that we have seen some realizations of a couple of purely random processes, 
+let's look at the empirical summaries of the time series. 
+
+```{r}
+mean(dt$e)
+```
+
+```{r}
+sd(dt$e)
+```
+
+Let's also compute is (empirical) auto-correlation coefficients applying the
+formula
+
+$$
+\hat{\rho}(k) = \frac{\hat{\gamma}(k)}{\hat{\gamma}(0)} \\
+\hat{\rho}(k) = \frac{\sum_{t = 1}^{T - k}(y_t - \hat{\mu})(y_{t + k} - \hat{\mu})}{\sum_{t = 1}^{T}(y_t - \hat{\mu})}
+$$
+
+where $\hat{\mu}$ is the sample average of the series.
+
+```{r}
+dt <- dt %>%
+  mutate(
+    e_l1 = lag(e, n = 1),
+    e_l2 = lag(e, n = 2),
+    e_l3 = lag(e, n = 3)
+  )
+```
+
+```{r}
+cor(dt$e, dt$e_l1, use = "complete.obs")
+cor(dt$e, dt$e_l2, use = "complete.obs")
+cor(dt$e, dt$e_l3, use = "complete.obs")
+```
+
+You can obtain these auto-correlation coefficients using the `acf` function:
+
+```{r}
+acf(dt$e, plot = FALSE)
+```
+
+and you can visualize the auto-correlation coefficients
+
+```{r}
+acf(dt$e)
+```
+
+Even though the time series was generated from a process without zero correlations, 
+the empirical auto-correlation coefficients will generally be non-zero. In order
+to assess whether the observed correlations are compatible with zero theoretical
+correlations, you can use the confidence interval 
+
+$$
+0 \pm \frac{2}{\sqrt{T}}
+$$
+that is shown as the two dashed horizontal lines in the plot.
+
+
+The Box-Ljung test is a statistical test for the hypothesis
+
+$$
+\rho_{1} = \rho_2 = \rho_{k} = 0
+$$
+
+and is based on the test statistic:
+
+$$
+Q = T(T + 2)\sum_{j = 1}^{k}\frac{\hat{\rho}^2(j)}{T - j}
+$$
+Under the null hypothesis (i.e., if we assume the null hypothesis to be true)
+it follows a $\Chi^2$ distribution with $k$ degrees of freedom.
+
+```{r}
+Box.test(dt$e, lag = 3)
+```
+
+
+## AR(1)
+
+The autoregressive (AR) process of first order is defined by
+
+$$
+y_{t} = \phi_0 + \phi_1 y_{t - 1} + e_t
+$$
+
+where $\phi_0, \phi_1 \in \mathbb{R}$ are fixed (non-random) constants, and
+$e_t$ is a purely random process.
+
+We would like to derive the statistical properties of the process (expected value, variance and correlations) from the model definitions.
+
+
+Let's give it a try. To derive it we use the model definition, the properties of the expected value operator from @thm-exp-value-props, and the properties of the purely random process in @def-purely-random. The expected value of the process is then
+
+$$
+\begin{align}
+E(y_t) & = E(\phi_0 + \phi_1 y_{t - 1} + e_t) \\
+       & = E(\phi_0) + E(\phi_1 y_{t - 1}) + E(e_t) \\
+       & = \phi_0 + \phi_1 E(y_{t - 1}) + 0 \\
+       & = \phi_0 + \phi_1 E(y_{t - 1})
+\end{align}
+$$
+Now we may seem to have hit a dead end, because knowing the expected value of $E(y_t)$ requires the knowledge of $E(y_{t - 1})$. However, if we assume that the expected value does not depend on the time index, so that
+
+$$
+E(y_t) = E(y_{t - 1}) = \mu
+$$
+
+then the equation is very easy to solve:
+
+$$
+\begin{align}
+\underbrace{E(y_{t})}_{\mu} & = \phi_0 + \phi_1 \underbrace{E(y_{t - 1})}_{\mu} \\
+\mu & = \phi_0 + \phi_1 \mu \\
+(1 - \phi_1)\mu & = \phi_0 \\
+\mu & = \frac{\phi_0}{1 - \phi_1}
+\end{align}
+$$
+
+In other words 
+
+$$
+\mu = E(y_{t}) = E(y_{t - 1}) = \frac{\phi_0}{1 - \phi_1}
+$${#eq-expected-value-ar-1}
+
+This derivation begs the question: are we allowed to assume that the expected value does not change over time? The answer is yes, if the process is mean-stationary. This is just another way to say that the expected value does not change but we can derive a condition when this is the case.
+
+To see how the stability condition for the first order difference equation relates
+to the expected value, consider the solution to the equation that we derived last time. The only new thing here is the constant term $\phi_0$.
+
+$$
+y_{t} = \phi_1^{t} y_{0} + \frac{1 - \phi_1^{t}}{1 - \phi_1} \phi_0 + \sum_{k = 0}^{t - 1} \phi_1^{k} u_{t - k}
+$$
+
+
+
+:::{#exr-variance-ar-1}
+## Variance of a Stationary AR(1)
+
+What is the variance of an AR(1) process given by:
+
+$$
+y_{t} = \phi_0 + \phi_1 y_{t - 1} + e_{t}, e_{t} \sim N(0, \sigma^2)
+$$
+Use the properties of the variance in @thm-variance-short and the properties of the purely random process to derive it.
+
+$$
+Var(y_{t}) = ?
+$$
+
+:::
+
+:::{#exr-ar-1-cor}
+## Autocorrelations of a AR(1) process
+
+Express the first and second order auto-correlations of the AR(1) process in terms of its coefficients $\phi_0$ and $\phi_1$. Without a loss of generality, assume that the process has a zero expected value.
+
+:::
+
+The derivation of the autocorrelations of MA(q) processes was relatively easy. For AR(1) processes you can derive the Yule-Walker equations that link the model coefficients and the autocovariances (and therefore the autocorrelations).
+
+Without a loss of generality, assume that the constant in the process is zero: $\phi_0 = 0$. This implies that the expected value of the process is zero (see @eq-expected-value-ar-1):
+
+$$
+\phi_0 = 0 \implies \mu = E(y_t) = E(y_{t - k}) = 0 \text{ for all } k 
+$$
+
+For a variable with zero expected value the variance and covariances
+are simply the expected value of the the cross-products (see @thm-variance-short).
+
+$$
+\begin{align}
+& Cov(y_t, y_{t - k}) = E(y_t y_{t - k}) \\
+& Var(y_{t}) = Cov(y_t, y_{t - 0}) = E(y_t y_{t}) = E(y_t^2) \\
+\end{align}
+$$
+Now it is very easy to compute the covariance: just take the process definition for a AR(1) and multiply both sides of the equation by $y_{t - k}$
+
+$$
+\begin{align}
+y_{t} & = \phi_1 y_{t - 1} + e_t \\
+y_{t - k}y_{t} & = \phi_1 y_{t - k} y_{t -1} + y_{t - k} e_t
+\end{align}
+$$
+Now take the expectation on both sides of the equation and apply the properties of the expected value from @thm-exp-value-props.
+
+$$
+\begin{align}
+E(y_{t - k}y_{t}) & = E(\phi_1 y_{t - k} y_{t -1} + y_{t - k} e_t) \\
+& = \phi_1 E(y_{t - k}y_{t - 1}) + E(y_{t - k}e_t)
+\end{align}
+$$
+Now there is only one crucial thing that you must realize. The last expected value in the equation is a product of $y_{t - k}$ and $e_{t}$. It is zero for all $k > 0$ but it equals $\sigma^2$ for $k=0$. Why? Let's write it down for $k = 0$.
+
+
+$$
+\begin{align}
+E(y_{t - 0}e_t) = E(y_t e_t) & = E\left((\phi_1 y_{t - 1} + e_t) e_t \right) \\
+& = E(\phi_1 y_{t - 1} e_t + e_t^2) \\
+& = \phi_1 E(y_{t - 1} e_t) + E(e_t^2) \\
+& = \phi_1 E(y_{t - 1} e_t) + Var(e_t) \\
+& = \phi_1 E(y_{t - 1} e_t) + \sigma^2 \\
+\end{align}
+$${#eq-yule-walker-ar-1-gen}
+
+
+Now keep in mind that $y_{t - 1}$ depends only on values of 
+$e_t$ that occur before $t$, so it must have zero covariance 
+with $e_{t}$
+
+
+$$
+y_{t - 1} = \phi_1 y_{t - 2} + e_{t - 1}
+$$
+
+and therefore 
+
+$$
+E(y_{t - 1}e_{t}) = 0
+$$
+
+The same also holds for the process variables before $t - 1$ such as $y_{t - k}$.
+
+Therefore we can express @eq-yule-walker-ar-1-gen as
+
+$$
+E(y_{t - k}y_{t}) = \phi_1 E(y_{t - k}y_{t - 1}) + \unicode{x1D7D9}_{k = 0}\sigma^2
+$$
+To simplify the notation a little bit, we will use the symbols for the autocovariances and autocorrelations defined in @def-autocorrelations.
+
+$$
+\begin{align}
+\gamma(k) = \phi_1 \gamma(k - 1) + \unicode{x1D7D9}_{k = 0}\sigma^2
+\end{align}
+$$
+Now we can write the equation for several values of $k$:
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1 \gamma(0 - 1) + \sigma^2 \\
+& k = 1: \gamma(1) = \phi_1 \gamma(1 - 1) + 0 \\
+& k = 2: \gamma(2) = \phi_1 \gamma(2 - 1) + 0 \\
+& k = 3: \gamma(3) = \phi_1 \gamma(3 - 1) + 0 \\
+\end{align}
+$$
+Simplifying a bit:
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1 \gamma(- 1) + \sigma^2 \\
+& k = 1: \gamma(1) = \phi_1 \gamma(0) \\
+& k = 2: \gamma(2) = \phi_1 \gamma(1) \\
+& k = 3: \gamma(3) = \phi_1 \gamma(2) \\
+\end{align}
+$$
+Now you need one final bit to complete the Yule-Walker equations. The autocovariances are symmetric, i.e. $\gamma(-k) = \gamma(k)$. So finally:
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1 \gamma(1) + \sigma^2 \\
+& k = 1: \gamma(1) = \phi_1 \gamma(0) \\
+& k = 2: \gamma(2) = \phi_1 \gamma(1) \\
+& k = 3: \gamma(3) = \phi_1 \gamma(2) \\
+\end{align}
+$$
+You can obtain the autocorrelations easily by dividing each equation by the variance of the process $\gamma(0)$
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1 \gamma(1) + \sigma^2 \\
+& k = 1: \gamma(1) = \phi_1 \gamma(0) \\
+& k = 2: \gamma(2) = \phi_1 \gamma(1) \\
+& k = 3: \gamma(3) = \phi_1 \gamma(2) \\
+\end{align}
+$$
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1 \gamma(1) + \sigma^2 \quad / \gamma(0)\\
+& k = 1: \gamma(1) = \phi_1 \gamma(0)  \quad / \gamma(0) \\
+& k = 2: \gamma(2) = \phi_1 \gamma(1)  \quad / \gamma(0)\\
+& k = 3: \gamma(3) = \phi_1 \gamma(2)  \quad / \gamma(0)\\
+\end{align}
+$$
+
+$$
+\begin{align}
+& k = 0: \rho(0) = \frac{\gamma(0)}{\gamma(0)} = 1\\
+& k = 1: \rho(1) = \frac{\gamma(1)}{\gamma(0)} = \phi_1\\
+& k = 2: \rho(2) = \frac{\gamma(2)}{\gamma(0)} = \phi_1 \frac{\gamma(1)}{\gamma(0)} \\
+& k = 3: \rho(3) = \frac{\gamma(3)}{\gamma(0)} = \phi_1 \frac{\gamma(2)}{\gamma(0)} \\
+\end{align}
+$$
+
+$$
+\begin{align}
+& k = 0: \rho(0) = 1\\
+& k = 1: \rho(1) = \phi_1\\
+& k = 2: \rho(2) = \phi_1 \rho(1) \\
+& k = 3: \rho(3) = \phi_1  \rho(2) \\
+\end{align}
+$$
+To compute $\rho(3)$ for example, you need to substitute for $\rho(2)$:
+
+$$
+\rho(3) = \phi_1 (\phi_1 \rho(1)) = \phi_1 (\phi_1 (\phi_1)) = \phi_1^3
+$$
+More generally you obtain 
+
+$$
+\rho(k) = \phi_1^{k}
+$$
+Lets see how this works for AR(3)
+
+$$
+y_t = \phi_1 y_{t - 1} + \phi_2y_{t - 2} + \phi_3 y_{t - 3} + e_t 
+$$
+
+Multiply the whole equation by $y_{t - k}$ and take expectations on both sides
+
+$$
+y_{t - k}y_t = \phi_1 y_{t - k}y_{t - 1} + \phi_2 y_{t - k} y_{t - 2} + \phi_3 y_{t - k} y_{t - 3} + y_{t - k}e_t
+$$
+
+$$
+E(y_{t - k}y_t) = \phi_1 E(y_{t - k}y_{t - 1}) + \phi_2 E(y_{t - k} y_{t - 2}) + \phi_3 E(y_{t - k} y_{t - 3}) + E(y_{t - k}e_t)
+$$
+
+Following the same reasoning as for the AR(1) process above and using the shorthand notation for the autocovariances:
+
+$$
+\gamma(k) = \phi_1\gamma(k - 1) + \phi_2 \gamma(k - 2) + \phi_3 \gamma(k - 3) + \unicode{x1D7D9}_{k = 0}\sigma^2
+$$
+Write it down for $k = 0, 1, 2$
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1\gamma(-1) + \phi_2\gamma(-2) + \phi_3 \gamma(-3) + \sigma^2 \\
+& k = 1: \gamma(1) = \phi_1\gamma(1 - 1) + \phi_2\gamma(1 -2) + \phi_3 \gamma(1 -3) \\
+& k = 2: \gamma(2) = \phi_1\gamma(2 - 1) + \phi_2\gamma(2 -2) + \phi_3 \gamma(2 -3) \\
+\end{align}
+$$
+
+Simplify and use the symmetry of autocovariances
+
+$$
+\begin{align}
+& k = 0: \gamma(0) = \phi_1\gamma(1) + \phi_2\gamma(2) + \phi_3 \gamma(3) + \sigma^2 \\
+& k = 1: \gamma(1) = \phi_1\gamma(0) + \phi_2\gamma(1) + \phi_3 \gamma(2) \\
+& k = 2: \gamma(2) = \phi_1\gamma(1) + \phi_2\gamma(0) + \phi_3 \gamma(1) \\
+\end{align}
+$$
+
+:::{exr-yule-walker-lecture}
+
+## Characteristic Roots and the Yule-Walker equations
+
+A solution to one of the problems from the lecture slides. You are given the characteristic roots of a third order autoregressive process. The task in this exercise is to use these roots to find the first and second order autocorrelations of this process. So, the roots of the characteristic equation are: 0.8, 0.2, -0.5. Roots of what? Remember that the lag operator shifts a series (@def-lag-operator):
+
+$$
+Ly_{t} = y_{t - 1}\\
+Ly_{t - 1} = y_{t - 2}\\
+L(L_{t}) = y_{t - 2}\\
+L^2y_{t} = y_{t - 2}\\
+L^3y_{t} = y_{t - 3}
+$$
+So you can express the AR(3) process in terms of its lag-polynomial:
+
+$$
+y_{t} = \phi_0 + \phi_{1}y_{t - 1} + \phi_2 y_{t - 2} + \phi_3 y_{t - 3} + e_t, \quad e_t \sim N(0, \sigma^2)
+$$
+$$
+\begin{align}
+y_{t} & = \phi_0 + \phi_1 Ly_{t} + \phi_2 L^2y_{t} + \phi_3 L^3 y_{t} + e_t\\
+y_{t}(\underbrace{L^0 - \phi_1 L - \phi_2 L^2 - \phi_3 L^3}_{\text{lag polynomial}}) & = \phi_0 + e_t
+\end{align}
+$$
+The characteristic equation is derived from the lag-polynomial as follows:
+
+$$
+\begin{align}
+\lambda^{3 - 0} - \phi_1\lambda^{3 - 1} - \phi_2 \lambda^{3 - 2} - \phi_3 \lambda ^ {3 - 3} & = 0\\
+\lambda^{3} - \phi_1\lambda^{2} - \phi_2 \lambda - \phi_3 & = 0
+\end{align}
+$$
+The roots of the characteristic polynomial determine whether the process is stationary
+or not. If the roots of this equation are less than 1 in absolute value then the process
+is stationary.
+
+If we know that the roots of this equation are
+
+$$
+\lambda_1^* = 0.8, \lambda_2^* = 0.2, \lambda_3^* = -0.5
+$$
+$$
+\lambda^{3} - \phi_1\lambda^{2} - \phi_2 \lambda - \phi_3 = (\lambda - \lambda_{1}^*)(\lambda - \lambda_2^*)(\lambda - \lambda_3^*) = 0
+$$
+$$
+\begin{align}
+(\lambda - \lambda_{1}^*)(\lambda - \lambda_2^*)(\lambda - \lambda_3^*) = \\
+(\lambda - 0.8)(\lambda - 0.2)(\lambda + 0.5) = \\
+\left[\lambda^2 - \lambda + 0.16\right](\lambda + 0.5) = \\
+\lambda^3 - \lambda^2 + 0.16\lambda + 0.5\lambda^2 - 0.5\lambda + 0.08
+\end{align}
+$$
+
+$$
+\lambda^{3} - \phi_1\lambda^{2} - \phi_2 \lambda - \phi_3\\
+\lambda^3 -0.5\lambda^2 -0.34\lambda + 0.08
+$$
+So we have now recovered the process coefficients from the
+roots of the characteristic equation.
+
+$$
+\begin{align}
+\phi_1 = 0.5\\
+\phi_2 = 0.34\\
+\phi_3 = -0.08
+\end{align}
+$$
+$$
+\begin{align}
+y_{t} & = \phi_0 + \phi_{1}y_{t - 1} + \phi_2 y_{t - 2} + \phi_3 y_{t - 3} + e_t\\
+y_{t} & = \phi_0 + 0.5y_{t - 1} + 0.34y_{t - 2} - 0.08 y_{t - 3} + e_t
+\end{align}
+$$
+Now we can calculate
+
+First order autocorrelation:
+$$
+\rho(y_{t}, y_{t - 1}) = \rho_1 = \frac{Cov(y_{t}, y_{t - 1})}{Var(y_{t})}
+$$
+The Yule-Walker equations connect the autocorrelations (and autocovariances) and
+the model coefficients.
+
+$$
+\begin{align}
+\rho_1 & = \phi_1 \rho_0 + \phi_2\rho_1 + \ldots + \phi_R\rho_{R - 1}\\
+\rho_2  & = \phi_1 \rho_1 + \phi_2 + \ldots + \phi_R \rho_{R - 2} \\
+\vdots\\
+\rho_{R - 1}  & = \phi_1 \rho_{R - 1} + \phi_2\rho_{R - 2} + \ldots + \phi_R\rho_0
+\end{align}
+$$
+In the case of an AR(3)
+
+$$
+\begin{align}
+\rho_1 & = \phi_1 + \phi_2 \rho_1 + \phi_3 \rho_2\\
+\rho_{2} & = \phi_{1}\rho_{2 - 1} + \phi_2 \rho_{2 - 2} + \phi_3\rho_{3 - 2}\\
+\end{align}
+$$
+Keep in mind that
+
+$$
+\rho(k) = \rho(-k)
+$$
+
+$$
+\begin{align}
+\rho_1 & = \phi_1 + \phi_2 \rho_1 + \phi_3 \rho_2\\
+\rho_{2} & = \phi_{1}\rho_{1} + \phi_2 \rho_{0} + \phi_3\rho_{1}\\
+\end{align}
+$$
+
+$$
+\begin{align}
+\rho_1 = 0.5 + 0.34 \rho_1 - 0.08 \rho_2\\
+\rho_2 = 0.5\rho_1 + 0.34 - 0.08\rho_1\\
+\end{align}
+$$
+This is a system of two unknowns and two equations. Its solution is left as an exercise.
+
