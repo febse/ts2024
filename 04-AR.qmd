@@ -216,6 +216,7 @@ E(y_t) & = E(\phi_0 + \phi_1 y_{t - 1} + e_t) \\
        & = \phi_0 + \phi_1 E(y_{t - 1})
 \end{align}
 $$
+
 Now we may seem to have hit a dead end, because knowing the expected value of $E(y_t)$ requires the knowledge of $E(y_{t - 1})$. However, if we assume that the expected value does not depend on the time index, so that
 
 $$
@@ -584,5 +585,5 @@ $$
 \rho_2 = 0.5\rho_1 + 0.34 - 0.08\rho_1\\
 \end{align}
 $$
-This is a system of two unknowns and two equations. Its solution is left as an exercise.
 
+This is a system of two unknowns and two equations. Its solution is left as an exercise.
