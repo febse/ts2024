@@ -12,4 +12,5 @@ dependencies:
   - r-rugarch
   - r-fable
   - r-plotly
+  - r-quantmod
 prefix: /home/amarov/anaconda3/envs/ts2024
