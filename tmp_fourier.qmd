@@ -1,0 +1,308 @@
+# The Discrete Fourier Transform
+
+## Example: Sine Waves
+
+The sine and cosine functions are very useful for describing repeating patterns. Both functions are periodic with a period of $2\pi$.
+
+There are three parameters that can be used to describe a sine wave:
+
+-   Amplitude: The height of the wave
+-   Frequency: The number of cycles per unit time
+-   Phase: The horizontal shift of the wave
+
+The general form of a sine wave is:
+
+$$
+y(t) = a \sin(2 \pi f t + \phi)
+$$
+
+where $A$ is the amplitude, $f$ is the frequency, $t$ is time, and $\phi$ is the phase.
+
+Let's see a couple of examples of sine waves.
+
+```{r}
+library(tidyverse)
+
+# Generate a sine wave with one cycle per second (1 Hz)
+
+waves <- tibble(
+  time = seq(0, 3, 1/1000),
+  sw = sin(2*pi*1* time)
+)
+
+waves %>%
+  ggplot(aes(x = time, y = sw)) +
+  geom_line() +
+  labs(title = "Sine wave with 1 Hz frequency",
+       x = "Time (s)",
+       y = "Amplitude"
+      )
+```
+
+We have constructed the first sine wave with a frequency of 1 Hz, amplitude of 1, and phase of 0. This means that the wave will repeat every second (time unit), and it will start at 0 (the phase). The height of the wave is 1.
+
+```{r}
+## Let us now generate a sine wave with a frequency of 2 Hz
+
+waves <- waves %>%
+  mutate(
+    sw2 = sin(2*pi*2* time)
+  )
+
+waves %>%
+  ggplot(aes(x = time, y = sw2)) +
+  geom_line() +
+  labs(
+    title = "Sine wave with 2 Hz frequency",
+    x = "Time (s)",
+    y = "Amplitude"
+  )
+```
+
+It may be easier to see the difference between the two waves if we plot them together.
+
+```{r}
+waves %>%
+  pivot_longer(cols = c(sw, sw2), names_to = "wave") %>%
+  ggplot(aes(x = time, y = value, color = wave)) +
+  geom_line() +
+  labs(
+    title = "Sine waves with 1 Hz and 2 Hz frequencies",
+    x = "Time (s)",
+    y = "Amplitude"
+  )
+```
+
+Here you should note that the wave with a frequency of 2 Hz repeats itself twice as often as the wave with a frequency of 1 Hz.
+
+The phase of a sine wave can be adjusted to shift the wave horizontally. For example, if we add a phase of $\pi/2$ to the wave with a frequency of 1 Hz, the wave will start at its maximum value.
+
+```{r}
+waves <- waves %>%
+  mutate(
+    sw_phase = sin(2*pi*1* time + pi/2)
+  )
+
+waves %>%
+  ggplot(aes(x = time, y = sw_phase)) +
+  geom_line() +
+  labs(
+    title = "Sine wave with 1 Hz frequency and phase of pi/2",
+    x = "Time (s)",
+    y = "Amplitude"
+  )
+```
+
+You may notice that the shifted wave starts at its maximum value, which is 1 and is the same as the cosine function. We say that the cosine function is a sine function with a phase shift of $\pi/2$.
+
+Now you may be wondering what the sine wave has to do with time series analysis.
+The point is that we can use a series of sine waves at different frequencies to decompose a time series into its frequency components. This is the idea behind the Fourier transform.
+
+## The Real Dot Product
+
+In order for our decomposition to work we need a notion of similarities between two functions and the dot product turns out to be an excellent candidate for the job.
+
+The dot product between two vectors is simply the sum of their elementwise product.
+
+For vectors $x$ and $y$ of the same length, the dot product is defined as:
+
+$$
+x \cdot y = \sum_{i=1}^{n} x_i y_i
+$$
+
+and can be written as a matrix multiplication:
+
+$$
+x \cdot y = x^T y
+$$
+
+where $x^T$ is the transpose of $x$.
+
+$$
+x = \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix} \quad
+y = \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix} \quad
+x^T y = \begin{bmatrix} x_1 & x_2 & \cdots & x_n \end{bmatrix} \begin{bmatrix} y_1 \\ y_2 \\ \vdots \\ y_n \end{bmatrix}
+$$
+
+The dot product is extremely useful because the Law of Cosines states that the dot product between two vectors is equal to the product of their magnitudes and the cosine of the angle between them.
+
+$$
+\cos(\theta) = \frac{x \cdot y}{\|x\| \|y\|}
+$$
+
+where $\theta$ is the angle between the two vectors, and $\|x\|$ and $\|y\|$ are the magnitudes of the vectors. The magnitudes (lengths) of the vectors are defined as:
+
+$$
+\|x\| = \sqrt{x \cdot x} = \sqrt{x_1^2 + x_2^2 + \cdots + x_n^2}
+$$
+
+and
+
+$$
+\|y\| = \sqrt{y \cdot y} = \sqrt{y_1^2 + y_2^2 + \cdots + y_n^2}
+$$
+
+Notice that if the two vectors are zero-centered, the cosine of the angle between them is equal to the correlation coefficient between the two vectors.
+
+```{r}
+# Let us draw two vectors 
+
+x <- c(1, 2)
+y <- c(-1, 2)
+
+# Plot the vectors
+library(plotly)
+
+plot_ly() %>%
+  add_trace(x = c(0, x[1]), y = c(0, x[2]), type = "scatter", mode = "lines", name = "x") %>%
+  add_trace(x = c(0, y[1]), y = c(0, y[2]), type = "scatter", mode = "lines", name = "y") %>%
+  layout(
+    title = "Two vectors in 2D",
+    xaxis = list(title = "x"),
+    yaxis = list(title = "y")
+  )
+```
+
+The dot product between the two vectors is:
+
+```{r}
+dot_product <- sum(x * y)
+dot_product
+```
+
+The magnitudes of the vectors are:
+
+```{r}
+magnitude_x <- sqrt(sum(x^2))
+magnitude_y <- sqrt(sum(y^2))
+
+magnitude_x
+magnitude_y
+```
+
+Now we can use the dot product as a measure of similarity between two sine waves. We will be calculating the dot product between two vectors that are the result of applying the two sine waves to a set of time points.
+
+```{r}
+# Generate a sine wave with a frequency of 1 Hz
+
+time <- seq(0, 4, 1/1000)
+sw1 <- sin(2*pi*1* time)
+sw2 <- sin(2*pi*1* time)
+
+# Calculate the dot product between the two sine waves
+
+dot_product <- sum(sw1 * sw2)
+dot_product
+```
+
+Now let's see how the dot product changes when we change the frequency of one of the sine waves.
+
+```{r}
+# Generate a sine wave with a frequency of 2 Hz
+
+sw3 <- sin(2*pi*2* time)
+
+# Calculate the dot product between the two sine waves
+
+dot_product <- sum(sw1 * sw3)
+dot_product
+```
+
+The dot product between the two sine waves gets smaller as the frequency difference between them increases (and is zero if the frequencies are multiples of 0.5 in this example).
+
+A problem with the real dot product is that it is not able to separate between difference in phase and difference in frequency. Let's take the example of two sine waves with the same frequency but different phases.
+
+```{r}
+# Generate a sine wave with a frequency of 1 Hz and a phase of 0
+sw4 <- sin(2*pi*1* time)
+
+# Generate a sine wave with a frequency of 1 Hz and a phase of pi/2
+sw5 <- sin(2*pi*1* time + pi/2)
+
+# Calculate the dot product between the two sine waves
+
+dot_product <- sum(sw4 * sw5)
+dot_product
+```
+
+The dot product between the two sine waves is now zero instead of 2000, although both waves share the same frequency. 
+This is because the dot product is sensitive to the phase difference between the two waves. In order to separate the effects of phase and frequency, we need to use the complex dot product.
+
+## Complex Numbers and the Complex Dot Product
+
+A complex number is a number that can be expressed in the form $a + bi$, where $a$ and $b$ are real numbers, and $i$ is the imaginary unit, which satisfies the equation $i^2 = -1$.
+We can identify the complex numbers with points in the complex plane, where the real part of the number is the x-coordinate and the imaginary part is the y-coordinate.
+
+```{r}
+# Let us draw a complex number
+
+a <- 1 + 2i
+
+plot_ly() %>%
+  add_trace(x = 0, y =
+              0, type = "scatter", mode = "markers", name = "Origin") %>% 
+  add_trace(x = Re(a), y = Im(a), type = "scatter", mode = "markers", name = "a") %>%
+  layout(
+    title = "Complex number a = 1 + 2i",
+    xaxis = list(title = "Real part"),
+    yaxis = list(title = "Imaginary part")
+  )
+```
+
+An equivalent way to represent a complex number is in polar form, where the number is represented by its magnitude and phase, which is very useful for multiplication of complex numbers. 
+
+The magnitude of a complex number $z = a + bi$ is defined as:
+
+$$
+\|z\| = \sqrt{a^2 + b^2}
+$$
+
+Let the (counter-clockwise) angle of a complex number $z = a + bi$ with the x-axis be $\theta$. The complex number can be written in polar form as:
+
+$$
+z = a + bi = r(\cos(\theta) + i \sin(\theta))
+$$
+
+An alternative way to represent a complex number is in exponential form:
+
+$$
+z = r e^{i \theta} = r \cos(\theta) + i r \sin(\theta)
+$$
+
+It turns out that the function $e^{z}$, $z \in \mathbb{C}$ is the extension of the exponential function to complex numbers. You don't need further details right now,
+but you can work with this function much in the same way you work with the real exponential function.
+
+The product of two complex numbers can be calculated by multiplying their magnitudes and adding their phases:
+
+$$
+z_1 z_2 = r_1 r_2 e^{i(\theta_1 + \theta_2)}
+$$
+
+## The Complex Dot Product
+
+The complex dot product is defined as the sum of the elementwise product of two complex vectors.
+
+For vectors $x$ and $y$ of the same length, the complex dot product is defined as:
+
+$$
+x \cdot y = \sum_{i=1}^{n} x_i \bar{y}_i
+$$
+
+where $x_i$ and $y_i$ are the elements of the vectors, and $\bar{y}_i$ is the complex conjugate of $y_i$.
+
+The complex conjugate changes the sign of the imaginary part of a complex number. For example the complex conjugate of $z = a + bi$ is:
+
+$$
+\bar{z} = a - bi
+$$
+
+The complex dot product is a complex number itself, with a real part and an imaginary part.
+
+The complex dot product is useful because it is able to separate the effects of phase and frequency. Let's see how the complex dot product behaves with the same examples we used for the real dot product.
+
+```{r}
+# Calculate the complex dot product between two sine waves with the same frequency
+
+complex_dot_product <- sum(sw1 * Conj(sw4))
+abs(complex_dot_product)
+```

@@ -1,0 +1,15 @@
+name: ts2024
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - r
+  - r-tsibble
+  - r-eurostat
+  - r-tidyverse
+  - r-xts
+  - r-urca
+  - r-rugarch
+  - r-fable
+  - r-plotly
+prefix: /home/amarov/anaconda3/envs/ts2024
