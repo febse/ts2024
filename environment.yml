@@ -13,4 +13,5 @@ dependencies:
   - r-fable
   - r-plotly
   - r-quantmod
+  - r-feasts
 prefix: /home/amarov/anaconda3/envs/ts2024
