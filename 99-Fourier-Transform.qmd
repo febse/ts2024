@@ -1,0 +1,272 @@
+
+# The Discrete Fourier Transform
+
+The Fourier Transform is one of the most important achievements in mathematics. It allows us to decompose a signal into its constituent frequencies.
+
+To see imagine how this works, consider the following example. You taste a nice chocolate and are enthusiastic about it. You would like to produce it at home, but you don't know the recipe and the master chocolatier is not keen on sharing it.
+
+It would be nice if you could pass the chocolate through a machine that would tell you the ingredients and their proportions. For example, the machine would tell you that the chocolate contains
+
+- cocoa 35%
+- cane sugar 25%
+- cocoa butter 20%
+- tiger nut flour
+- coconut cream
+- curcuma powder 2%
+- ginger powder 0.7%
+- lemon oil 0.5%
+- sunflower lecithin
+
+Unfortunately, we will not be dealing with chocolate in this chapter, but with signals. Take the following signal as an example:
+
+```{r}
+install.packages(c("tuneR", "seewave"))
+```
+
+```{r}
+# Read a wav file
+
+library(tuneR)
+library(seewave)
+
+piano <- readWave("./data/sound/looperman-l-7286776-0379634-soft-piano-polo-g.wav")
+```
+
+```{r}
+# Play the sound
+
+play(piano, player = "cvlc")
+```
+
+```{r}
+# Plot the sound in the time domain
+
+plot(piano, main = "Piano sound in the time domain")
+```
+
+```{r}
+# Create a sound from a sine wave
+
+sine_wave <- sine(500, duration = 1, samp.rate = 200, xunit = "time")
+```
+
+```{r}
+print(sine_wave)
+```
+
+```{r}
+# Play the sound
+
+play(sine_wave, player = "cvlc")
+```
+
+```{r}
+# Plot the sound in the time domain
+
+plot(sine_wave, main = "Sine wave in the time domain")
+```
+
+## The Complex Sine Wave
+
+The sine wave is a simple signal that oscillates between -1 and 1. It is defined by the following equation:
+
+$$
+y(t) = A \sin(2 \pi f t + \phi)
+$$
+
+where
+
+- $A$ is the amplitude of the wave
+- $f$ is the frequency of the wave
+- $t$ is the time
+- $\phi$ is the phase of the wave
+
+The sine wave is a real signal. However, we can also define a complex sine wave as follows:
+
+$$
+y(t) = A e^{i 2 \pi f t + \phi}
+$$
+
+where $i$ is the imaginary unit. The complex sine wave is a complex signal that oscillates between $-1$ and $1$.
+
+
+```{r}
+library(plotly)
+
+# General simulation parameters
+srate <- 500  # sampling rate in Hz
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+# Sine wave parameters
+freq <- 5  # frequency in Hz
+ampl <- 2  # amplitude in a.u.
+phas <- pi / 3  # phase in radians
+
+# Generate the sine wave
+csw <- ampl * exp(1i * (2 * pi * freq * time + phas))
+
+# Create a plot using plotly
+plot_ly() %>%
+  add_trace(
+    x = time, y = Re(csw),
+    type = 'scatter', mode = 'lines',
+    name = 'real', line = list(color = 'blue')
+  ) %>%
+  add_trace(
+    x = time, y = Im(csw),
+    type = 'scatter', mode = 'lines',
+    name = 'imag', line = list(color = 'red')
+  ) %>%
+  layout(
+    title = 'Complex sine wave projections',
+    xaxis = list(title = 'Time (sec.)'),
+    yaxis = list(title = 'Amplitude'),
+    legend = list(x = 0.1, y = 0.9)
+  )
+```
+
+```{r}
+library(plotly)
+
+# General simulation parameters
+srate <- 500  # sampling rate in Hz
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+# Sine wave parameters
+freq <- 5  # frequency in Hz
+ampl <- 2  # amplitude in a.u.
+phas <- pi / 3  # phase in radians
+
+# Generate the sine wave
+csw <- ampl * exp(1i * (2 * pi * freq * time + phas))
+
+# Create a 3D plot using plotly
+plot_ly() %>%
+  add_trace(
+    x = time, y = Re(csw), z = Im(csw),
+    type = 'scatter3d', mode = 'lines',
+    line = list(color = 'blue')
+  ) %>%
+  layout(
+    title = 'Complex sine wave in all its 3D glory',
+    scene = list(
+      xaxis = list(title = 'Time (s)'),
+      yaxis = list(title = 'Real part'),
+      zaxis = list(title = 'Imag part')
+    )
+  )
+```
+
+## The Dot Product
+
+The dot product between two vectors is simply the sum of the products of their corresponding elements. For example, the dot product between the vectors $[1, 2, 3]$ and $[4, 5, 6]$ is:
+
+$$
+1 \times 4 + 2 \times 5 + 3 \times 6 = 32
+$$
+
+The dot product is extremely important in all areas of statistics and machine learning, because it measures the similarity between two vectors.
+
+There is a mathematical theorem called the Law of Cosines that states that the dot product between two vectors is equal to the product of their magnitudes and the cosine of the angle between them:
+
+$$
+\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \|\mathbf{b}\| \cos(\theta)
+$$
+
+where $\theta$ is the angle between the vectors. If the vectors are zero-centered, the cosine of the angle is the same as the correlation between the vectors.
+
+The (empirical) correlation between two vectors is defined as:
+
+$$
+\hat{\rho}(x, y) = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}
+$$
+
+The length of a vector is defined as:
+
+$$
+\|\mathbf{a}\| = \sqrt{\sum_{i=1}^n a_i^2}
+$$
+
+```{r}
+# Define two vectors
+a <- c(1, 2)
+b <- c(-1, 3)
+
+# Calculate the dot product
+dot_product <- sum(a * b)
+
+print(dot_product)
+
+# Calculate the magnitudes
+magnitude_a <- sqrt(sum(a^2))
+magnitude_b <- sqrt(sum(b^2))
+
+# Calculate the cosine of the angle
+cosine_theta <- dot_product / (magnitude_a * magnitude_b)
+
+print(cosine_theta)
+```
+
+```{r}
+# Plot the vectors in 3D
+
+library(plotly)
+
+# Plot a and b
+
+plot_ly() %>%
+  add_trace(
+    x = c(0, a[1]), y = c(0, a[2]),
+    mode = 'lines',
+    name = 'a', line = list(color = 'blue')
+  ) %>%
+  add_trace(
+    x = c(0, b[1]), y = c(0, b[2]),
+    mode = 'lines',
+    name = 'b', line = list(color = 'red')
+  ) %>%
+  layout(
+    title = 'Vectors a and b',
+    scene = list(
+      xaxis = list(title = 'X'),
+      yaxis = list(title = 'Y')
+    )
+  )
+```
+
+# The Real Dot Product and the Sine Wave
+
+```{r}
+sr <- 500  # sampling rate in Hz (500 measurements per second)
+time <- seq(0, 2 - 1/sr, by = 1 / sr)  # time in seconds
+
+freq1 <- 5 # frequency in Hz
+freq2 <- 5 # frequency in Hz
+
+ampl1 <- 2  # amplitude 1
+ampl2 <- 2  # amplitude 2
+
+phas1 <- 2 * pi / 2  # phase 1 in radians
+phas2 <- pi / 2  # phase 2 in radians
+
+# Generate the sine waves
+sw1 <- ampl1 * sin(2 * pi * freq1 * time + phas1)
+sw2 <- ampl2 * sin(2 * pi * freq2 * time + phas2)
+
+# Calculate the dot product
+dot_product <- sum(sw1 * sw2)
+
+print(dot_product)
+```
+
+
+
+## The Complex Dot Product
+
+The dot product can be extended to complex numbers. The dot product between two complex numbers is defined as:
+
+$$
+\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i \bar{b_i}
+$$
+
+where $\bar{b_i}$ is the complex conjugate of $b_i$. The complex conjugate of a complex number $a + bi$ is $a - bi$.
