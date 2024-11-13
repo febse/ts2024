@@ -1,0 +1,119 @@
+# ARIMA Modeling (1)
+
+```{r}
+if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("eurostat")) install.packages("eurostat")
+if (!require("tsibble")) install.packages("tsibble")
+if (!require("fable")) install.packages("fable")
+if (!require("fabletools")) install.packages("fabletools")
+if (!require("feasts")) install.packages("feasts")
+
+library(tidyverse)
+library(eurostat)
+library(tsibble)
+library(fable)
+library(fabletools)
+library(feasts)
+```
+The first code chunk connects to the Eurostat Data API and downloads quarterly 
+data seasonally unadjusted GDP data for Bulgaria.
+
+```{r, warning=FALSE, output=FALSE}
+gdp <- get_eurostat(
+  "namq_10_gdp",
+  filters = list(
+    geo="BG",
+    unit = "CLV15_MEUR",
+    na_item = "B1GQ",
+    s_adj = "NSA"
+  ),
+  cache = FALSE,
+  type = "code"
+) %>%
+  filter(!is.na(values)) %>%
+  mutate(
+    q = yearquarter(str_replace(time, "-", " ")),
+    values = as.numeric(values)
+  ) %>%
+  as_tsibble(index = q) %>%
+  select(values)
+```
+
+1. Try to guess the unit of measurement (Euro/Lev)
+
+```{r}
+gdp %>%
+  index_by(Year = ~ year(.)) %>%
+  summarise(
+    GDP = sum(values)
+  )
+```
+
+2. Plot the series
+
+```{r}
+gdp %>%
+  autoplot(values)
+```
+
+2. Plot the a scatterplot of the lags of the series
+
+```{r}
+gdp %>%
+  gg_season(values)
+```
+
+```{r}
+gdp %>%
+  gg_subseries(values)
+```
+
+
+## Growth series 1 (quarter to previous quarter)
+
+For a series $y_1, \ldots, y_T$ the growth rate is given by
+
+$$
+g_t = \frac{y_t - y_{t - 1}}{y_{t - 1}} \approx \log(y_t) - \log(y_{t - 1})
+$$
+
+```{r}
+gdp <- gdp %>%
+  mutate(
+    log_gdp = log(values),
+    growth1 = log(values) - log(lag(values))
+  )
+```
+
+```{r}
+gdp %>%
+  autoplot(growth1)
+```
+```{r}
+gdp %>%
+  gg_season(growth1)
+```
+
+This series still shows strong seasonality. We would like to avoid that for now, as our
+familiar ARIMA models cannot handle seasonal effects (we will discuss this in the following weeks).
+
+
+Let us define the growth rate in a different way by comparing the GDP of a quarter with the GDP of the same quarter during the previous year.
+
+```{r}
+acf(gdp$growth1, na.action = na.pass)
+pacf(gdp$growth1, na.action = na.pass)
+```
+
+```{r}
+fit_AR1 <- arima(gdp$growth1, order = c(1, 0, 0))
+fit_AR1
+```
+
+```{r}
+predict(fit_AR1, n.ahead = 1)
+```
+
+```{r}
+tsdiag(fit_AR1)
+```
