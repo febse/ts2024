@@ -80,9 +80,9 @@ $$
 ```{r}
 gdp <- gdp %>%
   mutate(
-    log_gdp = log(values),
     growth1 = log(values) - log(lag(values))
-  )
+  ) %>%
+  filter()
 ```
 
 ```{r}
