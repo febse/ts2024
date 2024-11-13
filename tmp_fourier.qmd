@@ -1,5 +1,23 @@
 # The Discrete Fourier Transform
 
+The Fourier Transform is one of the most important achievements in mathematics. It allows us to decompose a signal into its constituent frequencies.
+
+To see imagine how this works, consider the following example. You taste a nice chocolate and are enthusiastic about it. You would like to produce it at home, but you don't know the recipe and the master chocolatier is not keen on sharing it.
+
+It would be nice if you could pass the chocolate through a machine that would tell you the ingredients and their proportions. For example, the machine would tell you that the chocolate contains
+
+- cocoa 35%
+- cane sugar 25%
+- cocoa butter 20%
+- tiger nut flour
+- coconut cream
+- curcuma powder 2%
+- ginger powder 0.7%
+- lemon oil 0.5%
+- sunflower lecithin
+
+Unfortunately, we will not be dealing with chocolate in this chapter, but with signals. Take the following signal as an example:
+
 ## Example: Sine Waves
 
 The sine and cosine functions are very useful for describing repeating patterns. Both functions are periodic with a period of $2\pi$.
@@ -305,4 +323,40 @@ The complex dot product is useful because it is able to separate the effects of 
 
 complex_dot_product <- sum(sw1 * Conj(sw4))
 abs(complex_dot_product)
+```
+
+
+## The Complex Sine Wave
+
+
+```{r}
+library(plotly)
+
+# General simulation parameters
+srate <- 500  # sampling rate in Hz
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+# Sine wave parameters
+freq <- 5  # frequency in Hz
+ampl <- 2  # amplitude in a.u.
+phas <- pi / 3  # phase in radians
+
+# Generate the sine wave
+csw <- ampl * exp(1i * (2 * pi * freq * time + phas))
+
+# Create a 3D plot using plotly
+plot_ly() %>%
+  add_trace(
+    x = time, y = Re(csw), z = Im(csw),
+    type = 'scatter3d', mode = 'lines',
+    line = list(color = 'blue')
+  ) %>%
+  layout(
+    title = 'Complex sine wave in all its 3D glory',
+    scene = list(
+      xaxis = list(title = 'Time (s)'),
+      yaxis = list(title = 'Real part'),
+      zaxis = list(title = 'Imag part')
+    )
+  )
 ```
