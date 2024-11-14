@@ -2,17 +2,17 @@ name: ts2024
 channels:
   - defaults
 dependencies:
-  - python=3.12
-  - r
-  - r-tsibble
+  - python=3.11
+  - conda-forge::rstudio-desktop
   - r-eurostat
-  - r-tidyverse
-  - r-xts
-  - r-urca
-  - r-rugarch
   - r-fable
+  - r-feasts
   - r-plotly
   - r-quantmod
-  - r-feasts
+  - r-rugarch
+  - r-tidyverse
   - r-tsbox
+  - r-tsibble
+  - r-urca
+  - r-xts
 prefix: /home/amarov/anaconda3/envs/ts2024
