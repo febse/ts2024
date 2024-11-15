@@ -321,12 +321,41 @@ The complex dot product is useful because it is able to separate the effects of 
 ```{r}
 # Calculate the complex dot product between two sine waves with the same frequency
 
-complex_dot_product <- sum(sw1 * Conj(sw4))
-abs(complex_dot_product)
+x <- c(1 + 2i, 2 + 3i)
+y <- c(-1 + 2i, 2 + 3i)
+
+complex_dot_product <- sum(x * Conj(y))
+complex_dot_product
 ```
 
+```{r}
+# Plot the dot product in the complex plane
+
+plot_ly() %>%
+  add_trace(x = 0, y = 0, type = "scatter", mode = "markers", name = "Origin") %>%
+  add_trace(x = Re(complex_dot_product), y = Im(complex_dot_product), type = "scatter", mode = "markers", name = "x . y") %>%
+  layout(
+    title = "Complex dot product",
+    xaxis = list(title = "Real part"),
+    yaxis = list(title = "Imaginary part")
+  )
+```
 
 ## The Complex Sine Wave
+
+The complex sine wave is a periodic function (just like the real sine wave) that can be represented as a complex number and is in fact
+an extension of the real sine wave to the complex plane.
+
+The complex sine wave is defined as:
+
+$$
+s(t) = A e^{i(2 \pi f t + \phi)} = A (\cos(2 \pi f t + \phi) + i \sin(2 \pi f t + \phi))
+$$
+
+where $A$ is the amplitude, $f$ is the frequency, $t$ is time, and $\phi$ is the phase.
+
+If we restrict the complex sine to the real axis we will obtain the real sine wave.
+To do this, set the imaginary part of the complex sine wave to zero.
 
 
 ```{r}
@@ -353,6 +382,35 @@ plot_ly() %>%
   ) %>%
   layout(
     title = 'Complex sine wave in all its 3D glory',
+    scene = list(
+      xaxis = list(title = 'Time (s)'),
+      yaxis = list(title = 'Real part'),
+      zaxis = list(title = 'Imag part')
+    )
+  )
+```
+
+```{r}
+# Add projections on the real and imaginary axes
+
+plot_ly() %>%
+  add_trace(
+    x = time, y = Re(csw), z = Im(csw),
+    type = 'scatter3d', mode = 'lines',
+    line = list(color = 'blue')
+  ) %>%
+  add_trace(
+    x = time, y = Re(csw), z = rep(0, length(csw)),
+    type = 'scatter3d', mode = 'lines',
+    line = list(color = 'red')
+  ) %>%
+  add_trace(
+    x = time, y = rep(0, length(csw)), z = Im(csw),
+    type = 'scatter3d', mode = 'lines',
+    line = list(color = 'green')
+  ) %>%
+  layout(
+    title = 'Complex sine wave with projections',
     scene = list(
       xaxis = list(title = 'Time (s)'),
       yaxis = list(title = 'Real part'),
