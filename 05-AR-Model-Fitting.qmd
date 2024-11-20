@@ -132,3 +132,23 @@ where $\hat{\rho}_k$ is the sample autocorrelation at lag $k$, $T$ is the number
 
 The test statistic $Q$ is asymptotically distributed as a $\chi^2$ random variable with $K$ degrees of freedom.
 
+## Information Criteria
+
+The Akaike Information Criterion (AIC) and the Bayesian Information Criterion (BIC) are used to compare the fit of different models.
+
+The AIC is defined as
+
+$$
+AIC = -2 \log(L) + 2k
+$$
+
+where $L$ is the likelihood of the model and $k$ is the number of parameters.
+
+The BIC is defined as
+
+$$
+BIC = -2 \log(L) + k \log(T)
+$$
+
+where $T$ is the number of observations.
+
