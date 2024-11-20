@@ -3,7 +3,6 @@ channels:
   - defaults
 dependencies:
   - python=3.11
-  - conda-forge::rstudio-desktop
   - r-eurostat
   - r-fable
   - r-feasts

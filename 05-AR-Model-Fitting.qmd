@@ -117,3 +117,18 @@ predict(fit_AR1, n.ahead = 1)
 ```{r}
 tsdiag(fit_AR1)
 ```
+
+## Box-Ljung Test
+
+The Box-Ljung test is a statistical test for the null hypothesis that the data are not serially correlated up to lag $K$.
+
+The test statistic is
+
+$$
+Q = T(T + 2) \sum_{k = 1}^K \frac{\hat{\rho}_k^2}{T - k}
+$$
+
+where $\hat{\rho}_k$ is the sample autocorrelation at lag $k$, $T$ is the number of observations, and $K$ is the number of lags being tested.
+
+The test statistic $Q$ is asymptotically distributed as a $\chi^2$ random variable with $K$ degrees of freedom.
+
