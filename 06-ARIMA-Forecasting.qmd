@@ -232,13 +232,20 @@ $$
 
 
 ```{r}
-x <- arima.sim(n = 100, model = list(ar = 0.5))
+x <- 2 + arima.sim(n = 100, model = list(ar = 0.9))
 fit_AR1 <- Arima(x, order = c(1, 0, 0))
 fit_AR1
 ```
 ```{r}
 forecast(fit_AR1, level = 0.95, h = 1)
 ```
+
+
+```{r}
+fit_AR1_arima <- arima(x, order = c(1, 0, 0))
+fit_AR1_arima
+```
+
 
 ## Forecasting MA(1)
 
