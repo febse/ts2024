@@ -13,7 +13,7 @@ book:
     - 02-Linear-Difference-Equations.qmd
     - 03-Statistics-Review.qmd
     - 04-AR.qmd
-    - 05-Model-Fitting.qmd
+    - 05-AR-Model-Fitting.qmd
     - 06-ARIMA-Forecasting.qmd
     # - 04-AR.qmd
     # - 05-Model-Fitting.qmd
