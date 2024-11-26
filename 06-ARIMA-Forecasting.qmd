@@ -5,6 +5,12 @@ date: "12/21/2021"
 output: html_document
 ---
 
+```{r}
+if (!require("forecast")) install.packages("forecast")
+
+library(forecast)
+```
+
 # Forecasting with ARMA processes
 
 Let $y_t$ follow a stationary ARMA process. The Wold decomposition states that every stationary ARMA process can be represented as MA($\infty$).
