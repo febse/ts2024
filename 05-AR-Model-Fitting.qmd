@@ -151,4 +151,3 @@ BIC = -2 \log(L) + k \log(T)
 $$
 
 where $T$ is the number of observations.
-
