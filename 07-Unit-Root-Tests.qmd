@@ -25,6 +25,7 @@ y_{t} = y_{t - 1} + e_{t}, e_t \sim WN(\sigma^2)\\
 f' = \lim_{\epsilon \to 0}\frac{f(x) - f(x + \epsilon)}{\epsilon}
 \end{align}
 $$
+
 The solution of the characteristic equation of this model is equal to one. We say that *the equation has a unit root*.
 
 $$
