@@ -100,21 +100,18 @@ res <- residuals(linreg_fit)
 acf(res)
 ```
 
-
-
-# Unit root tests
+## Dickey-Fuller Test
 
 AR(1) process without a constant
 
 $$
 y_{t} = \phi_1 y_{t - 1} + e_{t}, e_t \sim WN(\sigma^2)
 $$
-If the process has a unit root, it follows that $\phi_1 = 1$.
 
-We would like to test the hypothesis:
+If the process has a unit root, it follows that $\phi_1 = 1$. We would like to test the hypothesis:
 
 $$
-H_0: \phi_1 = 1\\
+H_0: \phi_1 = 1 \\
 H_1: \phi_1 < 1
 $$
 
@@ -318,6 +315,15 @@ summary(ur.df(ar4, type = "none", lags = 0))
 ```{r}
 summary(ur.df(ar4, type = "none", selectlags = "AIC"))
 ```
+
+## Application
+
+```{r}
+dt <- read_csv("https://github.com/febse/data/raw/refs/heads/main/sim.csv")
+dt_ts <- ts(dt$x, start = 1990, frequency = 12)
+dt_ts
+```
+
 
 
 ## KPSS Test
