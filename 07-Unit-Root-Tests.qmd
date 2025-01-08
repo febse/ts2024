@@ -306,6 +306,10 @@ $$
 set.seed(521)
 ar4 <- arima.sim(n = 200, model = list(ar = c(0.6, 0.4, -0.7)))
 plot(ar4)
+
+fit <- arima(ar4, order = c(1, 0 , 1))
+fit1 <- arima(ar4, order = c(2, 0, 0))
+AIC(fit, fit1)
 ```
 
 ```{r}

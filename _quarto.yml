@@ -16,6 +16,7 @@ book:
     - 05-AR-Model-Fitting.qmd
     - 06-ARIMA-Forecasting.qmd
     - 07-Unit-Root-Tests.qmd
+    - 08-GARCH.qmd
     # - 04-AR.qmd
     # - 05-Model-Fitting.qmd
     # - 06-Unit-Root-Tests.qmd
