@@ -6,7 +6,18 @@ output: html_document
 ---
 
 ```{r, message = FALSE}
-# install.packages(c("quantmod", "tidyverse", "xts", "rugarch"))
+if (!require("quantmod")) {
+  install.packages("quantmod")
+}
+if (!require("tidyverse")) {
+  install.packages("tidyverse")
+}
+if (!require("xts")) {
+  install.packages("xts")
+}
+if (!require("rugarch")) {
+  install.packages("rugarch")
+}
 
 library(quantmod)
 library(tidyverse)
@@ -165,7 +176,7 @@ Let us fit a GARCH(1, 1) model to the TESLA data. There are several packages in 
 ```{r}
 mod <- ugarchspec(
   variance.model = list(
-    model = "sGARCH",
+    model = "gjrGARCH",
     garchOrder = c(1, 1)
   ),
   mean.model = list(
@@ -173,7 +184,7 @@ mod <- ugarchspec(
     include.mean = TRUE
   ),
   # Normal distribution
-  distribution.model = "std"
+  distribution.model = "norm"
 )
 
 ## Remove the first element of the time series because
@@ -193,6 +204,8 @@ fit_GARCH11_res <- residuals(fit_GARCH11, standardize = TRUE)
 ```{r}
 acf(fit_GARCH11_res^2)
 ```
+
+You can find a nice guide to the `rugarch` package [here](https://cran.r-project.org/web/packages/rugarch/vignettes/Introduction_to_the_rugarch_package.pdf).
 
 ## Forecasting
 
