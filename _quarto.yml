@@ -22,6 +22,7 @@ book:
     # - 06-Unit-Root-Tests.qmd
     # - 08-ARIMA-Forecasting.qmd
     # - 09-GARCH.qmd
+    - 09-ANN.ipynb
     - references.qmd
 
 bibliography: refs.bib
