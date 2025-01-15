@@ -1,0 +1,33 @@
+```{r}
+if (!require("sn")) install.packages("sn")
+
+# Simulate data from a skew normal distribution with center 0, standard deviation 1 and positive skewness
+
+library(sn)
+
+set.seed(123)
+
+n <- 1000
+x <- rsn(n, xi = 0, omega = 1, alpha = 3, tau=0)
+
+hist(x, breaks = 30, prob = TRUE, col = "lightblue", border = "white", main = "Histogram of simulated data", xlim = c(-5, 5))
+lines(density(x), col = "red", lwd = 2)
+
+## Overlay a normal distribution
+
+curve(dnorm(x, mean=0.7, sd = 0.7), add=TRUE, col = "blue", lwd = 2)
+
+# Set the x limit
+
+# Fit a skew normal distribution to the data
+
+```
+
+
+```{r}
+# Make a qq-plot of the data against a normal distribution
+
+qqnorm(x)
+qqline(x, col = "red", lwd = 2)
+```
+

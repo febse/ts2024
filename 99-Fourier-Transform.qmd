@@ -35,36 +35,129 @@ piano <- readWave("./data/sound/looperman-l-7286776-0379634-soft-piano-polo-g.wa
 ```{r}
 # Play the sound
 
-play(piano, player = "cvlc")
+# play(piano, player = "cvlc")
 ```
 
 ```{r}
 # Plot the sound in the time domain
 
-plot(piano, main = "Piano sound in the time domain")
+# plot(piano, main = "Piano sound in the time domain")
+```
+
+## Sine and Cosine Waves
+
+```{r}
+# Plot a sine wave with A = 1, f = 1, phi = 0
+
+srate <- 500  # sampling rate in Hz
+
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+freq <- 1  # frequency in Hz
+ampl <- 1  # amplitude in a.u.
+phas <- 0  # phase in radians
+
+sw <- ampl * sin(2 * pi * freq * time + phas)
+
+plot(time, sw, type = 'l', xlab = 'Time (s)', ylab = 'Amplitude', main = 'Sine wave')
 ```
 
 ```{r}
-# Create a sound from a sine wave
+# Plot a cosine wave with A = 1, f = 2, phi = 0
 
-sine_wave <- sine(500, duration = 1, samp.rate = 200, xunit = "time")
+srate <- 500  # sampling rate in Hz
+
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+freq <- 2  # frequency in Hz
+ampl <- 1  # amplitude in a.u.
+phas <- 0  # phase in radians
+
+cw <- ampl * cos(2 * pi * freq * time + phas)
+
+plot(time, cw, type = 'l', xlab = 'Time (s)', ylab = 'Amplitude', main = 'Cosine wave')
+
 ```
 
 ```{r}
-print(sine_wave)
+# A sine wave with a pi/2 phase shift is a cosine wave
+
+srate <- 500  # sampling rate in Hz
+
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+freq <- 1  # frequency in Hz
+ampl <- 1  # amplitude in a.u.
+
+sw <- ampl * sin(2 * pi * freq * time + pi / 2)
+
+plot(time, sw, type = 'l', xlab = 'Time (s)', ylab = 'Amplitude', main = 'Sine wave with pi/2 phase shift')
+```
+
+## Power Spectrum of a Sine Wave
+
+```{r}
+## Take the power spectrum of a sine wave with A = 1, f = 5, phi = 0
+
+srate <- 100  # sampling rate in Hz
+
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+freq <- 5  # frequency in Hz
+ampl <- 1  # amplitude in a.u.
+phas <- 0  # phase in radians
+
+sw <- ampl * sin(2 * pi * freq * time + phas)
+
+# Time domain plot
+plot(time, sw, type = 'l', xlab = 'Time (s)', ylab = 'Amplitude', main = 'Sine wave')
+
+# Frequency domain plot
+
+# Calculate the power spectrum
+spec <- abs(fft(sw)) / length(sw)
+
+# Frequency vector
+
+hz <- seq(0, srate / 2, length.out = length(sw) / 2 + 1)
+
+plot(hz, spec[1:length(hz)], type = 'p', pch=2, xlab = 'Frequency (Hz)', ylab = 'Power', main = 'Power spectrum of a sine wave')
+
+# Add lines from the x-axis to each point
+segments(hz, 0, hz, spec[1:length(hz)])
+
+```
+
+
+```{r}
+# A power spectrum of a white noise signal
+
+srate <- 500  # sampling rate in Hz
+
+time <- seq(0, 2, by = 1 / srate)  # time in seconds
+
+noise <- rnorm(length(time))
+
+# Time domain plot
+plot(time, noise, type = 'l', xlab = 'Time (s)', ylab = 'Amplitude', main = 'White noise signal')
 ```
 
 ```{r}
-# Play the sound
+# Frequency domain plot
 
-play(sine_wave, player = "cvlc")
+# Calculate the power spectrum
+spec <- abs(fft(noise)) / length(noise)
+
+# Frequency vector
+hz <- seq(0, srate / 2, length.out = length(noise) / 2 + 1)
+
+plot(hz, spec[1:length(hz)], type = 'p', pch=2, xlab = 'Frequency (Hz)', ylab = 'Power', main = 'Power spectrum of white noise')
+
+# Add lines from the x-axis to each point
+segments(hz, 0, hz, spec[1:length(hz)])
 ```
 
-```{r}
-# Plot the sound in the time domain
 
-plot(sine_wave, main = "Sine wave in the time domain")
-```
 
 ## The Complex Sine Wave
 
