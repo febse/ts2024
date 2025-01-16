@@ -1,8 +1,9 @@
 # Homework Assignment (graded) {.unnumbered}
 
-Please find the homework assignment here and register your team **by January 21-th, 2025**.
+Please register for the homework assignment **by January 21-th, 2025**. at the following link:
 
 <https://classroom.github.com/a/KFYU_0wV>
+
 
 0.  In order to access the homework you will need a working GitHub account. If you don't have one, please create a profile with [GitHub](https://github.com/signup). Please use a working email address when opening your account, because you will receive notifications from GitHub related to the grading of the homework.
 
