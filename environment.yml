@@ -283,11 +283,13 @@ dependencies:
   - r-magrittr=2.0.3=r43h76d94ec_0
   - r-mass=7.3_60=r43h76d94ec_0
   - r-matrix=1.6_1.1=r43h76d94ec_0
+  - r-matrixmodels=0.5_2=r43h6115d3f_0
   - r-mclust=6.0.0=r43h640688f_0
   - r-memoise=2.0.1=r43h6115d3f_0
   - r-mgcv=1.9_0=r43h76d94ec_0
   - r-mime=0.12=r43h76d94ec_0
   - r-misc3d=0.9_1=r43h142f84f_0
+  - r-mnormt=2.1.1=r43h640688f_0
   - r-modelr=0.1.11=r43h6115d3f_0
   - r-multicool=0.1_12=r43h884c59f_0
   - r-munsell=0.5.0=r43h6115d3f_0
@@ -316,6 +318,7 @@ dependencies:
   - r-purrr=1.0.2=r43h76d94ec_0
   - r-quadprog=1.5_8=r43h640688f_0
   - r-quantmod=0.4.25=r43h6115d3f_0
+  - r-quantreg=5.97=r43h640688f_0
   - r-r6=2.5.1=r43h6115d3f_0
   - r-ragg=1.2.6=r43h884c59f_0
   - r-rappdirs=0.3.3=r43h76d94ec_0
@@ -341,9 +344,12 @@ dependencies:
   - r-selectr=0.4_2=r43h6115d3f_0
   - r-skewhyperbolic=0.4_0=r43h6115d3f_0
   - r-slider=0.3.1=r43h884c59f_0
+  - r-sn=2.1.1=r43h142f84f_0
+  - r-sparsem=1.81=r43h640688f_0
   - r-spd=2.0_1=r43h142f84f_0
   - r-stringi=1.7.12=r43h884c59f_0
   - r-stringr=1.5.0=r43h6115d3f_0
+  - r-survival=3.5_7=r43h76d94ec_0
   - r-sys=3.4.2=r43h76d94ec_0
   - r-systemfonts=1.0.5=r43h884c59f_0
   - r-testthat=3.2.0=r43h884c59f_0
