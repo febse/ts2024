@@ -19,31 +19,6 @@ It would be nice if you could pass the chocolate through a machine that would te
 
 Unfortunately, we will not be dealing with chocolate in this chapter, but with signals. Take the following signal as an example:
 
-```{r}
-install.packages(c("tuneR", "seewave"))
-```
-
-```{r}
-# Read a wav file
-
-library(tuneR)
-library(seewave)
-
-piano <- readWave("./data/sound/looperman-l-7286776-0379634-soft-piano-polo-g.wav")
-```
-
-```{r}
-# Play the sound
-
-# play(piano, player = "cvlc")
-```
-
-```{r}
-# Plot the sound in the time domain
-
-# plot(piano, main = "Piano sound in the time domain")
-```
-
 ## Sine and Cosine Waves
 
 ```{r}
@@ -141,6 +116,8 @@ noise <- rnorm(length(time))
 # Time domain plot
 plot(time, noise, type = 'l', xlab = 'Time (s)', ylab = 'Amplitude', main = 'White noise signal')
 ```
+
+## The Power Spectrum of a Purely Random Process (White Noise)
 
 ```{r}
 # Frequency domain plot
