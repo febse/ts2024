@@ -9,6 +9,7 @@ book:
   chapters:
     - index.qmd
     # - 00-Assignment.qmd
+    - 00-Homework.qmd
     - 01-Introduction.qmd
     - 02-Linear-Difference-Equations.qmd
     - 03-Statistics-Review.qmd
